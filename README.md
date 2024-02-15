@@ -1,11 +1,9 @@
 # texlive-full
-Overleaf's fullest texlive image. Provide you with extreme excellent experience.
+Overleaf's fullest texlive image. Provide you with extreme excellent experience. You can also use this for your personal TeX-Writing, or mount it to your sharelatex container.
 
 > [!WARNING] 
 > - This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.
 > - If you want to use Sharelatex CE with inner contained LaTeX compile, refer to [Overleaf official](github.com/overleaf/overleaf) to find more tutorials. This repository is for server-pro's Docker Compile.
-
-You can also use this for your personal TeX-Writing, or mount it to your sharelatex container.
 
 ## TeXLive Version
 
@@ -36,7 +34,7 @@ The following fonts are contained in the docker image.
 
 
 > [!WARNING] 
-> Please confirm whether the relevant fonts can be used commercially. We are not responsible for any legal issues arising from your incorrect use.
+> Please confirm whether the relevant fonts can be used commercially. We are **not responsible** for any legal issues arising from your incorrect use.
 
 
 ## License
