@@ -1,4 +1,4 @@
-name: Build texlive-full:base
+name: Build texlive-full(base)
 
 on:
   # push:
