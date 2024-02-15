@@ -1,11 +1,11 @@
 # texlive-full
 Overleaf's fullest texlive image. Provide you with extreme excellent experience.
 
-> [!WARNING]  
+> [!WARNING] 
 > - This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.
-> - If you want to use Sharelatex CE with inner contained texlive, refer to [Overleaf official](github.com/overleaf/overleaf) to find more tutorials.
+> - If you want to use Sharelatex CE with inner contained LaTeX compile, refer to [Overleaf official](github.com/overleaf/overleaf) to find more tutorials. This repository is for server-pro's Docker Compile.
 
-This folder includes Texlive images Dockerfile for Overleaf. You can also use it for your personal Tex-Writing, or mount it to your sharelatex container.
+You can also use this for your personal TeX-Writing, or mount it to your sharelatex container.
 
 ## TeXLive Version
 
@@ -20,33 +20,28 @@ We use mirror archive from [utah university](https://ftp.math.utah.edu/pub/tex/h
 
 > Why texlive 2010 and earlier are not supported ?
 >
-> Because Git-Action can't finish it as 2009,2008..., and we believe you may not use it any more since it's too old
+> To maintain such images is more than difficult. And we believe you may not use it any more since it's too old.
 
 ## Contained Component
 
 The following things are contained in the docker image.
-- fontconfig 
-- inkscape 
-- pandoc 
-- python3-pygments 
-- wget
-- python3
-- gnupg 
-- gnuplot
-- perl-modules 
-- perl 
-- ca-certificates 
-- git
-- ghostscript
-- qpdf 
-- r-base-core 
-- tar
+- fontconfig inkscape pandoc python3-pygments wget python3
+- gnupg gnuplot perl-modules perl ca-certificates git
+- ghostscript qpdf r-base-core tar
 
 The following fonts are contained in the docker image.
+- [Google Fonts](https://fonts.google.com/)
+- [Microsoft msttcorefonts](https://packages.ubuntu.com/jammy/ttf-mscorefonts-installer)
+- [Overleaf supported fonts](https://www.overleaf.com/learn/latex/Questions/Which_OTF_or_TTF_fonts_are_supported_via_fontspec%3F)
 
-- Google Fonts
-- Microsoft msttcorefonts
-- Overleaf support fonts like [this](https://www.overleaf.com/learn/latex/Questions/Which_OTF_or_TTF_fonts_are_supported_via_fontspec%3F)
+
+> [!WARNING] 
+> Please confirm whether the relevant fonts can be used commercially. We are not responsible for any legal issues arising from your incorrect use.
+
+
+## License
+MIT
+
 
 ## Tech Reminder
 While build texlive image, you may need to pay attention to the following problems:
