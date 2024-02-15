@@ -37,4 +37,4 @@ jobs:
           context: texlive/${{ matrix.tex-version }}
           file: texlive/${{ matrix.tex-version }}/Dockerfile
           push: true
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex-version }}
+          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex-version }}.1
