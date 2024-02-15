@@ -16,10 +16,9 @@ LABEL \
     org.opencontainers.image.description="Overleaf TeXLive Image by ayaka-notes"
 
 
-# Copy LatexMk... file 
+# Copy LatexMk run-chktex.sh file 
 # -----------------------------------
 COPY LatexMk /usr/local/share/latexmk/LatexMk
-COPY patchSynctex.R /usr/local/bin/
 COPY run-chktex.sh /usr/local/bin/
 
 # Set file exec mod
@@ -29,8 +28,8 @@ RUN chmod 777 -R /usr/local/bin/ && chmod 777 -R /usr/local/share/latexmk/
 
 # ARG For TEXLIVE
 # -----------------------------------
-ARG TEXLIVE_Version=2023
-ARG TEXLIVE_MIRROR=https://mirrors.mit.edu/CTAN/systems/texlive/tlnet/
+ARG TEXLIVE_Version=2020
+ARG TEXLIVE_MIRROR=http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
 
 
 # Install texlive like Overleaf
