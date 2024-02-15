@@ -37,7 +37,7 @@ ENV REBUILT_AFTER="2023-11-02"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     fontconfig inkscape pandoc python3-pygments wget python3 \
     gnupg gnuplot perl-modules perl ca-certificates git ghostscript \
-    qpdf r-base-core tar build-essential 
+    qpdf r-base-core tar make
 
 
 # Install fonts
