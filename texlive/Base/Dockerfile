@@ -33,7 +33,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Update to ensure dependencies are updated
 # ------------------------------------------
-ENV REBUILT_AFTER="2023-11-02"
+ENV REBUILT_AFTER="2024-14-02"
 
 # Install dependencies
 # --------------------
