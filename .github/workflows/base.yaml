@@ -54,4 +54,4 @@ jobs:
             context: texlive/Slim
             file: texlive/Slim/Dockerfile
             push: true
-            tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:slim
+            tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:2023.1.slim
