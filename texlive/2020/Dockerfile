@@ -1,5 +1,5 @@
 # ---------------------------------------------
-# Overleaf TexLive 2023 (ayaka-notes/overleaf)
+# Overleaf TexLive 2020 (ayaka-notes/overleaf)
 # ---------------------------------------------
 
 # Use base image, see texlive/base
