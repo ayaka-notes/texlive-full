@@ -1,0 +1,40 @@
+name: Build texlive-full
+
+on:
+  # push:
+  #   branches:
+  #     - dev
+  workflow_dispatch:
+
+env:
+  DOCKER_REGISTRY: registry.cn-hongkong.aliyuncs.com
+  IMAGE_NAME: ayaka-notes/texlive-full
+  # IMAGE_TAG: base
+
+jobs:
+  build-push-image:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        tex-version: ["2020", "2021", "2022", "2023", "2024", "Test"]
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
+
+      - name: 'Login to GitHub Container Registry'
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{github.actor}}
+          password: ${{secrets.ALIYUN_REGISTRY_TOKEN}}
+
+      - name: Build and push Docker image
+        id: docker_build
+        uses: docker/build-push-action@v5.1.0
+        with:
+          context: texlive/${{ matrix.tex-version }}
+          file: texlive/${{ matrix.tex-version }}/Dockerfile
+          push: true
+          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex-version }}.1
