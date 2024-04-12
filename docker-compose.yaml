@@ -1,0 +1,55 @@
+# Usage:
+# REGISTRY_AND_USER=[] docker-compose build 2024 2023 2022 2021 2020 base slim
+# REGISTRY_AND_USER=[] docker-compose push 2024 2023 2022 2021 2020 base slim
+
+
+##################
+# You may wonders why 20XX.1, `.1` is not month, but the version.
+# This is because overleaf uses the version number to determine the texlive version.
+# So, I have no choice but to use the version number as the tag.
+
+# 你可能会奇怪为什么20XX.1，`.1`不是月份，而是版本号。
+# 这是因为overleaf使用版本号来确定texlive版本。
+# 所以，我别无选择，只能使用版本号作为标签。
+
+services:
+  2024:
+    image: ${REGISTRY_AND_USER}/texlive-full:2024.1
+    build:
+      context: ./texlive/2024
+      dockerfile: Dockerfile
+  2023:
+    image: ${REGISTRY_AND_USER}/texlive-full:2023.1
+    build:
+      context: ./texlive/2023
+      dockerfile: Dockerfile
+  
+  2022:
+    image: ${REGISTRY_AND_USER}/texlive-full:2022.1
+    build:
+      context: ./texlive/2022
+      dockerfile: Dockerfile
+  
+  2021:
+    image: ${REGISTRY_AND_USER}/texlive-full:2021.1
+    build:
+      context: ./texlive/2021
+      dockerfile: Dockerfile
+  
+  2020:
+    image: ${REGISTRY_AND_USER}/texlive-full:2020.1
+    build:
+      context: ./texlive/2020
+      dockerfile: Dockerfile
+  
+  base:
+    image: ${REGISTRY_AND_USER}/texlive-full:base
+    build:
+      context: ./texlive/base
+      dockerfile: Dockerfile
+  
+  slim:
+    image: ${REGISTRY_AND_USER}/texlive-full:slim.1
+    build:
+      context: ./texlive/slim
+      dockerfile: Dockerfile

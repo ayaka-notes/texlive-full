@@ -1,4 +1,4 @@
-name: Clean Repo Image
+name: Clean Image(texlive-full)
 
 on:
   workflow_dispatch:
