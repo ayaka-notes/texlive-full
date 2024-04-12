@@ -1,4 +1,4 @@
-name: Build texlive-full
+name: Build texlive-full(ghcr)
 
 on:
   # push:
