@@ -8,7 +8,8 @@ Overleaf's fullest texlive image. Provide you with extreme excellent experience.
 ## TeXLive Version
 
 Thanks to Github Action, we can build all tex image parallel, which includes:
-- `ghcr.io/ayaka-notes/texlive-full/texlive:2023.1` (Also `latest` tag)
+- `ghcr.io/ayaka-notes/texlive-full/texlive:2024.1` (Also `latest` tag)
+- `ghcr.io/ayaka-notes/texlive-full/texlive:2023.1`
 - `ghcr.io/ayaka-notes/texlive-full/texlive:2022.1`
 - `ghcr.io/ayaka-notes/texlive-full/texlive:2021.1`
 - `ghcr.io/ayaka-notes/texlive-full/texlive:2020.1`
