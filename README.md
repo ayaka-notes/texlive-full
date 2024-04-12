@@ -8,11 +8,11 @@ Overleaf's fullest texlive image. Provide you with extreme excellent experience.
 ## TeXLive Version
 
 Thanks to Github Action, we can build all tex image parallel, which includes:
-- `ghcr.io/ayaka-notes/overleaf/texlive:2023.1` (Also `latest` tag)
-- `ghcr.io/ayaka-notes/overleaf/texlive:2022.1`
-- `ghcr.io/ayaka-notes/overleaf/texlive:2021.1`
-- `ghcr.io/ayaka-notes/overleaf/texlive:2020.1`
-- `ghcr.io/ayaka-notes/overleaf/texlive:base`
+- `ghcr.io/ayaka-notes/texlive-full/texlive:2023.1` (Also `latest` tag)
+- `ghcr.io/ayaka-notes/texlive-full/texlive:2022.1`
+- `ghcr.io/ayaka-notes/texlive-full/texlive:2021.1`
+- `ghcr.io/ayaka-notes/texlive-full/texlive:2020.1`
+- `ghcr.io/ayaka-notes/texlive-full/texlive:base`
 
 We use mirror archive from [utah university](https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/), which includes almost all texlive image ranging from 1996 to 2024. And thankes to Overleaf's Dockerfile, we can build this project faster.
 
