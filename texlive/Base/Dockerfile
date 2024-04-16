@@ -12,7 +12,7 @@
 # This Dockerfile is used to build texlive-full:base
 # And texlive:2024, texlive:2023 and so on are all based on this
 # Base Image Contain fonts, apt-installed component
-FROM phusion/baseimage:jammy-1.0.1
+FROM ubuntu:22.04
 
 # LABEL
 # -----------------------------------
