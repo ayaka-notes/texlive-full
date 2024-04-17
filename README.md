@@ -4,7 +4,7 @@ Overleaf's fullest texlive image. Provide you with extreme excellent experience.
 > [!WARNING] 
 > - This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.
 > - If you want to use Sharelatex CE with inner contained LaTeX compile, refer to [Overleaf official](github.com/overleaf/overleaf) to find more tutorials. This repository is for server-pro's Docker Compile.
-> - The long time compile bug has been fixed now(2024.4.17), please update your docker image.
+> - A long time compile bug [link #1](https://github.com/ayaka-notes/texlive-full/issues/1) has been fixed now(2024.4.17), please update your docker image.
 
 ## TeXLive Version
 
