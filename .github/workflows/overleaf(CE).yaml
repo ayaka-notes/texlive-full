@@ -37,4 +37,4 @@ jobs:
           context: overleaf-full/${{ matrix.ol-version }}
           file: overleaf-full/${{ matrix.ol-version }}/Dockerfile
           push: true
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex-version }}.1
+          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.ol-version }}
