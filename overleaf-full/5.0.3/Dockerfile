@@ -1,67 +1,67 @@
 FROM sharelatex/sharelatex:5.0.3
 
 
-# # Makes sure LuaTex cache is writable
-# # -----------------------------------
-# ENV TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
+# Makes sure LuaTex cache is writable
+# -----------------------------------
+ENV TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
 
-# # Set ENV to noninteractive
-# # -----------------------------------
-# ENV DEBIAN_FRONTEND noninteractive
+# Set ENV to noninteractive
+# -----------------------------------
+ENV DEBIAN_FRONTEND noninteractive
 
-# # Update to ensure dependencies are updated
-# # ------------------------------------------
-# ENV REBUILT_AFTER="2024-14-02"
+# Update to ensure dependencies are updated
+# ------------------------------------------
+ENV REBUILT_AFTER="2024-14-02"
 
-# # Install dependencies
-# # --------------------
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     fontconfig inkscape pandoc python3-pygments wget python3 \
-#     gnupg gnuplot perl-modules perl ca-certificates git ghostscript \
-#     qpdf r-base-core tar make
-
-
-# # Install fonts
-# # --------------------
-# RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-# && apt-get update && apt-get install -y ttf-mscorefonts-installer \
-# && apt update && apt search ^fonts | grep -o '^fonts[^/]*' | xargs apt install -y \
-# && wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
-# && tar -xf gf.tar.gz \
-# && mkdir -p /usr/share/fonts/truetype/google-fonts \
-# && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
-# && rm -f gf.tar.gz \
-# && fc-cache -f && rm -rf /var/cache/*# Makes sure LuaTex cache is writable
-# # -----------------------------------
-# ENV TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
-
-# # Set ENV to noninteractive
-# # -----------------------------------
-# ENV DEBIAN_FRONTEND noninteractive
-
-# # Update to ensure dependencies are updated
-# # ------------------------------------------
-# ENV REBUILT_AFTER="2024-14-02"
-
-# # Install dependencies
-# # --------------------
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     fontconfig inkscape pandoc python3-pygments wget python3 \
-#     gnupg gnuplot perl-modules perl ca-certificates git ghostscript \
-#     qpdf r-base-core tar make
+# Install dependencies
+# --------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    fontconfig inkscape pandoc python3-pygments wget python3 \
+    gnupg gnuplot perl-modules perl ca-certificates git ghostscript \
+    qpdf r-base-core tar make
 
 
-# # Install fonts
-# # --------------------
-# RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-# && apt-get update && apt-get install -y ttf-mscorefonts-installer \
-# && apt update && apt search ^fonts | grep -o '^fonts[^/]*' | xargs apt install -y \
-# && wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
-# && tar -xf gf.tar.gz \
-# && mkdir -p /usr/share/fonts/truetype/google-fonts \
-# && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
-# && rm -f gf.tar.gz \
-# && fc-cache -f && rm -rf /var/cache/*
+# Install fonts
+# --------------------
+RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+&& apt-get update && apt-get install -y ttf-mscorefonts-installer \
+&& apt update && apt search ^fonts | grep -o '^fonts[^/]*' | xargs apt install -y \
+&& wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
+&& tar -xf gf.tar.gz \
+&& mkdir -p /usr/share/fonts/truetype/google-fonts \
+&& find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
+&& rm -f gf.tar.gz \
+&& fc-cache -f && rm -rf /var/cache/*# Makes sure LuaTex cache is writable
+# -----------------------------------
+ENV TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
+
+# Set ENV to noninteractive
+# -----------------------------------
+ENV DEBIAN_FRONTEND noninteractive
+
+# Update to ensure dependencies are updated
+# ------------------------------------------
+ENV REBUILT_AFTER="2024-14-02"
+
+# Install dependencies
+# --------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    fontconfig inkscape pandoc python3-pygments wget python3 \
+    gnupg gnuplot perl-modules perl ca-certificates git ghostscript \
+    qpdf r-base-core tar make
+
+
+# Install fonts
+# --------------------
+RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+&& apt-get update && apt-get install -y ttf-mscorefonts-installer \
+&& apt update && apt search ^fonts | grep -o '^fonts[^/]*' | xargs apt install -y \
+&& wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
+&& tar -xf gf.tar.gz \
+&& mkdir -p /usr/share/fonts/truetype/google-fonts \
+&& find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
+&& rm -f gf.tar.gz \
+&& fc-cache -f && rm -rf /var/cache/*
 
 
 # Copy LatexMk... file 
