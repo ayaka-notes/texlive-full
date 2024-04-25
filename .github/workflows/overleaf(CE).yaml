@@ -1,4 +1,4 @@
-name: Build texlive-full(ghcr)
+name: Build overleaf-full(ghcr)
 
 on:
   # push:
