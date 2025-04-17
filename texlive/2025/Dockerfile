@@ -29,9 +29,9 @@ RUN chmod 777 -R /usr/local/bin/ && chmod 777 -R /usr/local/share/latexmk/
 
 # ARG For TEXLIVE
 # -----------------------------------
-ARG TEXLIVE_Version=2024
-ARG TEXLIVE_MIRROR=http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
-    
+ARG TEXLIVE_Version=2025
+ARG TEXLIVE_MIRROR=https://mirrors.mit.edu/CTAN/systems/texlive/tlnet/
+
 
 # Install texlive like Overleaf
 # -----------------------------------

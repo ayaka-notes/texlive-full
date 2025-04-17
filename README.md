@@ -5,11 +5,13 @@ Overleaf's fullest texlive image. Provide you with extreme excellent experience.
 > - This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.
 > - If you want to use Sharelatex CE with inner contained LaTeX compile, refer to [Overleaf official](github.com/overleaf/overleaf) to find more tutorials. This repository is for server-pro's Docker Compile.
 > - A long time compile bug [link #1](https://github.com/ayaka-notes/texlive-full/issues/1) has been fixed now(2024.4.17), please update your docker image.
+> - TeXLive 2025 is in beta!(2025.4.17).
 
 ## TeXLive Version
 
 Thanks to Github Action, we can build all tex image parallel, which includes:
-- `ghcr.io/ayaka-notes/texlive-full/texlive:2024.1` (Also `latest` tag)
+- `ghcr.io/ayaka-notes/texlive-full/texlive:2025.1` (Also `latest` tag)
+- `ghcr.io/ayaka-notes/texlive-full/texlive:2024.1`
 - `ghcr.io/ayaka-notes/texlive-full/texlive:2023.1`
 - `ghcr.io/ayaka-notes/texlive-full/texlive:2022.1`
 - `ghcr.io/ayaka-notes/texlive-full/texlive:2021.1`
