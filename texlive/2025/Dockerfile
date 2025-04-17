@@ -24,7 +24,7 @@ COPY run-chktex.sh /usr/local/bin/
 
 # Set file exec mod
 # -----------------------------------
-RUN chmod 777 -R /usr/local/bin/ && chmod 777 -R /usr/local/share/latexmk/
+RUN chmod +x /usr/local/bin/* && chmod +x /usr/local/share/latexmk/*
 
 
 # ARG For TEXLIVE
