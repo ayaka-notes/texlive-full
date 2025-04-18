@@ -23,13 +23,13 @@ COPY run-chktex.sh /usr/local/bin/
 
 # Set file exec mod
 # -----------------------------------
-RUN chmod 777 -R /usr/local/bin/ && chmod 777 -R /usr/local/share/latexmk/
+RUN chmod +x /usr/local/bin/* && chmod +x /usr/local/share/latexmk/*
 
 
 # ARG For TEXLIVE
 # -----------------------------------
 ARG TEXLIVE_Version=2020
-ARG TEXLIVE_MIRROR=http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
+ARG TEXLIVE_MIRROR=https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
 
 
 # Install texlive like Overleaf
