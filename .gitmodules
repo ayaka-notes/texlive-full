@@ -1,0 +1,3 @@
+[submodule "texlive/Base/extrafonts"]
+	path = texlive/Base/extrafonts
+	url = https://git.sjtu.edu.cn/nicsdev/latex/fonts
