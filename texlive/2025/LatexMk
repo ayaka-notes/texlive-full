@@ -1,9 +1,10 @@
+
 # Settings
 $xdvipdfmx = "xdvipdfmx -z 6 -i dvipdfmx-unsafe.cfg -o %D %O %S";
-$latex = "latex %O --shell-escape %S";
-$pdflatex = "pdflatex %O --shell-escape %S";
-$dvi_options = "--shell-escape";
-$pdf_options = "--shell-escape";
+
+# Workaround to allow pstricks transparency (https://github.com/overleaf/issues/issues/3449)
+$dvipdf = "dvipdf -dNOSAFER -dALLOWPSTRANSPARENCY %O %S %D";
+
 ###############################
 # Post processing of pdf file #
 ###############################

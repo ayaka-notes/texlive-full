@@ -1,5 +1,5 @@
 # ---------------------------------------------
-# Overleaf TexLive 2025 (ayaka-notes/overleaf)
+# Overleaf TexLive 2024 (ayaka-notes/overleaf)
 # ---------------------------------------------
 
 # Use base image, see texlive/base
@@ -24,7 +24,7 @@ COPY run-chktex.sh /usr/local/bin/
 
 # Set file exec mod
 # -----------------------------------
-RUN chmod +x /usr/local/bin/* && chmod +x /usr/local/share/latexmk/*
+RUN chmod 777 -R /usr/local/bin/ && chmod 777 -R /usr/local/share/latexmk/
 
 
 # ARG For TEXLIVE
@@ -52,18 +52,24 @@ RUN mkdir /install-tl-unx \
 &&  echo "selected_scheme scheme-full" >> /install-tl-unx/texlive.profile \
     \
 &&  /install-tl-unx/install-tl \
-      -profile /install-tl-unx/texlive.profile \
-      -repository ${TEXLIVE_MIRROR} \
+        -profile /install-tl-unx/texlive.profile \
+        -repository ${TEXLIVE_MIRROR} \
     \
 &&  $(find /usr/local/texlive -name tlmgr) path add \
 &&  tlmgr install --repository ${TEXLIVE_MIRROR} \
-      latexmk \
-      texcount \
-      synctex \
-      etoolbox \
-      xetex \
+        latexmk \
+        texcount \
+        synctex \
+        etoolbox \
+        xetex \
 &&  tlmgr path add \
 &&  rm -rf /install-tl-unx
+
+
+# System font configuration for XeTeX and LuaTeX
+RUN echo "OSFONTDIR = /usr/share/fonts//" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf
+RUN ln -s /usr/local/texlive/${TEXLIVE_Version}/texmf-var/fonts/conf/texlive-fontconfig.conf /etc/fonts/conf.d/09-texlive.conf \
+&&  fc-cache -fsv
 
 
 # Config file /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf

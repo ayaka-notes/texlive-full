@@ -43,6 +43,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     qpdf r-base-core tar make
 
 
+# Install Extra fonts
+COPY ./extrafonts /usr/share/fonts/
+
+
 # Install fonts
 # --------------------
 RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
