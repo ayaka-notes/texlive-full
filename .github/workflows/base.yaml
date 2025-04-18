@@ -15,8 +15,17 @@ jobs:
   push-base-image:
     runs-on: ubuntu-latest
     steps:
+      # 登录到gitlab
+      - name: Login to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git config --global url."https://oauth2:${GITLAB_TOKEN}@git.sjtu.edu.cn/".insteadOf "https://git.sjtu.edu.cn/"
+          git config --global url."https://oauth2:${GITLAB_TOKEN}@git.sjtu.edu.cn/".insteadOf "git@git.sjtu.edu.cn:"
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
+        with:
+          submodules: true
 
       - name: 'Login to GitHub Container Registry'
         uses: docker/login-action@v3.0.0
