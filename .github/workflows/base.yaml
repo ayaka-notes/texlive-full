@@ -15,19 +15,12 @@ jobs:
   push-base-image:
     runs-on: ubuntu-latest
     steps:
-      # 登录到gitlab
-      - name: Setup GitLab Auth (.netrc)
-        run: |
-          cat <<EOF > ~/.netrc
-          machine git.sjtu.edu.cn
-            login oauth2
-            password ${{ secrets.GITLAB_TOKEN }}
-          EOF
-          chmod 600 ~/.netrc
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
         with:
           submodules: true
+          token: ${{ secrets.GITLAB_TOKEN }}
+          
       - name: 'Login to GitHub Container Registry'
         uses: docker/login-action@v3.0.0
         with:
