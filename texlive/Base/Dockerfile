@@ -40,7 +40,8 @@ ENV REBUILT_AFTER="2024-14-02"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     fontconfig inkscape pandoc python3-pygments wget python3 \
     gnupg gnuplot perl-modules perl ca-certificates git ghostscript \
-    qpdf r-base-core tar make
+    qpdf r-base-core tar make \
+    && rm -rf /var/lib/apt/lists/*
 
 
 # Install Extra fonts
@@ -53,10 +54,9 @@ RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula sele
 && apt-get update && apt-get install -y ttf-mscorefonts-installer \
 && apt update && apt search ^fonts | grep -o '^fonts[^/]*' | xargs apt install -y \
 && wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
+&& rm -rf /var/lib/apt/lists/* \
 && tar -xf gf.tar.gz \
 && mkdir -p /usr/share/fonts/truetype/google-fonts \
 && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
 && rm -f gf.tar.gz \
 && fc-cache -f && rm -rf /var/cache/*
-
-

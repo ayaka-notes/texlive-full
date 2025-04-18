@@ -54,7 +54,7 @@ RUN mkdir /install-tl-unx \
 &&  /install-tl-unx/install-tl \
       -profile /install-tl-unx/texlive.profile \
       -repository ${TEXLIVE_MIRROR} \
-  \
+    \
 &&  $(find /usr/local/texlive -name tlmgr) path add \
 &&  tlmgr install --repository ${TEXLIVE_MIRROR} \
       latexmk \
