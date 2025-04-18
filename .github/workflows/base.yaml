@@ -15,16 +15,20 @@ jobs:
   push-base-image:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Git Authentication for GitLab
+
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
+        with:
+          submodules: false
+      - name: Setup Authentication for GitLab
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
           # 把 .gitmodules 中的 URL 替换为带 Token 的 URL
           sed -i "s|https://git.sjtu.edu.cn/|https://oauth2:${GITLAB_TOKEN}@git.sjtu.edu.cn/|g" .gitmodules
-      - name: 'Checkout GitHub Action'
-        uses: actions/checkout@main
-        with:
-          submodules: true
+          # 更新submodules
+          git submodule update --init --recursive
+
       - name: 'Login to GitHub Container Registry'
         uses: docker/login-action@v3.0.0
         with:
