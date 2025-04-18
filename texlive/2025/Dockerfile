@@ -52,16 +52,16 @@ RUN mkdir /install-tl-unx \
 &&  echo "selected_scheme scheme-full" >> /install-tl-unx/texlive.profile \
     \
 &&  /install-tl-unx/install-tl \
-        -profile /install-tl-unx/texlive.profile \
-        -repository ${TEXLIVE_MIRROR} \
-    \
+      -profile /install-tl-unx/texlive.profile \
+      -repository ${TEXLIVE_MIRROR} \
+  \
 &&  $(find /usr/local/texlive -name tlmgr) path add \
 &&  tlmgr install --repository ${TEXLIVE_MIRROR} \
-        latexmk \
-        texcount \
-        synctex \
-        etoolbox \
-        xetex \
+      latexmk \
+      texcount \
+      synctex \
+      etoolbox \
+      xetex \
 &&  tlmgr path add \
 &&  rm -rf /install-tl-unx
 
