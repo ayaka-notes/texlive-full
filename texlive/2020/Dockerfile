@@ -66,9 +66,8 @@ RUN mkdir /install-tl-unx \
 
 
 # System font configuration for XeTeX and LuaTeX
-RUN echo "OSFONTDIR = /usr/share/fonts//" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf
-RUN ln -s /usr/local/texlive/${TEXLIVE_Version}/texmf-var/fonts/conf/texlive-fontconfig.conf /etc/fonts/conf.d/09-texlive.conf \
-&&  fc-cache -fsv
+COPY 09-texlive.conf /etc/fonts/conf.d/
+RUN fc-cache -fsv
 
 
 # Config file /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf
