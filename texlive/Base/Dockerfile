@@ -25,7 +25,7 @@ LABEL \
 
 # Makes sure LuaTex cache is writable
 # -----------------------------------
-ENV TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
+ENV TEXMFVAR=/tmp/texmf-var
 
 # Set ENV to noninteractive
 # -----------------------------------
