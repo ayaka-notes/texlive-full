@@ -1,4 +1,4 @@
-# texlive-full
+# Texlive-full
 Overleaf's fullest texlive image. Provide you with extreme excellent experience. You can also use this for your personal TeX-Writing, or mount it to your sharelatex container.
 
 > [!WARNING] 
@@ -45,7 +45,17 @@ The following fonts are contained in the docker image.
 MIT
 
 
-## Tech Reminder
+## Problem 01: Font Cache Miss Problem
+When overleaf compile latex project, if font miss occurs, **you may find the compile progress takes a long time**, that is because when a font is miss, texlive will try to **rebuild the whole font cache**. This is a time-consuming process.
+
+In our image, we have pre-built the font cache, we fix this problem by [this commit](https://github.com/ayaka-notes/texlive-full/commit/0cb66b0dc8b82be628cf6999cfd659d9784e132f)
+
+## Problem 02: Sync Tex Extremely Slow
+When you use this image in sharelatex, you may find that the sync tex is extremely slow.
+
+See: https://github.com/overleaf/overleaf/issues/1150, just disable http 2.0.
+
+## Other Tech Reminder
 While build texlive image(before 2019), you may need to pay attention to the following problems:
 - Only `http`/`ftp` is supported before texlive 2017, so you can't use `https` to download, unless you modify the `peal` script.
 - Before 2015, only sha256 file is provided. So you can't use sha512 to check.
