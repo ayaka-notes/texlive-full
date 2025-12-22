@@ -10,13 +10,13 @@ Overleaf's fullest texlive image. Provide you with extreme excellent experience.
 ## TeXLive Version
 
 Thanks to Github Action, we can build all tex image parallel, which includes:
-- `ghcr.io/ayaka-notes/texlive-full/texlive:2025.1` (Also `latest` tag)
-- `ghcr.io/ayaka-notes/texlive-full/texlive:2024.1`
-- `ghcr.io/ayaka-notes/texlive-full/texlive:2023.1`
-- `ghcr.io/ayaka-notes/texlive-full/texlive:2022.1`
-- `ghcr.io/ayaka-notes/texlive-full/texlive:2021.1`
-- `ghcr.io/ayaka-notes/texlive-full/texlive:2020.1`
-- `ghcr.io/ayaka-notes/texlive-full/texlive:base`
+- `ghcr.io/ayaka-notes/texlive-full:2025.1` (Also `latest` tag)
+- `ghcr.io/ayaka-notes/texlive-full:2024.1`
+- `ghcr.io/ayaka-notes/texlive-full:2023.1`
+- `ghcr.io/ayaka-notes/texlive-full:2022.1`
+- `ghcr.io/ayaka-notes/texlive-full:2021.1`
+- `ghcr.io/ayaka-notes/texlive-full:2020.1`
+- `ghcr.io/ayaka-notes/texlive-full:base`
 
 We use mirror archive from [utah university](https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/), which includes almost all texlive image ranging from 1996 to 2024. And thankes to Overleaf's Dockerfile, we can build this project faster.
 
@@ -54,6 +54,11 @@ In our image, we have pre-built the font cache, we fix this problem by [this com
 When you use this image in sharelatex, you may find that the sync tex is extremely slow.
 
 See: https://github.com/overleaf/overleaf/issues/1150, just disable http 2.0.
+
+## Problem 03: Re-Compile Error with Official Texlive Image
+If you use texlive official image on docker hub `texlive/texlive`, you may find that when you re-compile a project, it will report error. However, in our image, this problem is fixed. Becase we use latest ubuntu base image and install all dependencies from ubuntu official repo.
+
+
 
 ## Other Tech Reminder
 While build texlive image(before 2019), you may need to pay attention to the following problems:
