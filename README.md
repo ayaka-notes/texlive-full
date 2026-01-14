@@ -7,6 +7,20 @@ Overleaf's fullest texlive image. Provide you with extreme excellent experience.
 > - A long time compile bug [link #1](https://github.com/ayaka-notes/texlive-full/issues/1) has been fixed now(2024.4.17), please update your docker image.
 > - TeXLive 2025 is in beta!(2025.4.17).
 
+## overleaf-Cep Usage
+
+Texlive-full@Ayaka-notes support [overleaf-cep](https://github.com/yu-i-i/overleaf-cep), you can use the following environment variables to `config/variables.env` file if you are [toolkit user](https://github.com/overleaf/toolkit).
+
+For example:
+```
+ALL_TEX_LIVE_DOCKER_IMAGES=ghcr.io/ayaka-notes/texlive-full:2025.1, ghcr.io/ayaka-notes/texlive-full:2024.1
+ALL_TEX_LIVE_DOCKER_IMAGE_NAMES=Texlive 2025, Texlive 2024
+TEX_LIVE_DOCKER_IMAGE=ghcr.io/ayaka-notes/texlive-full:2025.1
+```
+
+If you need more help, refer to [overleaf-cep documentation](https://github.com/yu-i-i/overleaf-cep/wiki/Extended-CE:-Sandboxed-Compiles)
+
+
 ## TeXLive Version
 
 Thanks to Github Action, we can build all tex image parallel, which includes:
