@@ -40,9 +40,26 @@ ENV REBUILT_AFTER="2024-14-02"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     fontconfig inkscape pandoc python3-pygments wget python3 \
     gnupg gnuplot perl-modules perl ca-certificates git ghostscript \
-    qpdf r-base-core tar make \
+    qpdf tar make \
+    \
+    # R
+    r-base r-base-dev \
+    build-essential gfortran pkg-config \
+    \
+    # common libs that many R packages need
+    libcurl4-openssl-dev libssl-dev libxml2-dev \
+    libcairo2-dev libpango1.0-dev \
+    libfontconfig1-dev libfreetype6-dev \
+    libjpeg-dev libpng-dev libtiff5-dev \
+    libharfbuzz-dev libfribidi-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Install R packages (one shot, non-interactive, pinned repo)
+# --------------------
+RUN Rscript -e "options(repos=c(CRAN='https://cloud.r-project.org')); \
+    pkgs <- c('knitr','rmarkdown','tinytex'); \
+    install.packages(pkgs, Ncpus=max(1, parallel::detectCores()-1)); \
+    sapply(pkgs, requireNamespace, quietly=TRUE) |> stopifnot()"
 
 # Install Extra fonts
 COPY ./extrafonts /usr/share/fonts/
