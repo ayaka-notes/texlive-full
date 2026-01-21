@@ -1,13 +1,31 @@
-# Texlive-full
-Overleaf's fullest texlive image. Provide you with extreme excellent experience. You can also use this for your personal TeX-Writing, or mount it to your sharelatex container.
+# TeXLive-Full Edition
+
+A fully-featured **TeXLive Docker image** designed for Overleaf Server Pro, Overleaf-CEP, and standalone LaTeX compilation environments.
+
+This image aims to provide an almost complete TeXLive distribution with common fonts and tools preinstalled, in order to minimize compilation failures caused by missing packages or fonts.
+
+
+## ✨ Features
+
+- 📦 Nearly full TeXLive installation  
+- 🧩 Preinstalled common fonts and utilities  
+- 🐳 Ready to use with Docker and Docker Compose  
+- 🧪 Tested with Overleaf Server Pro / Overleaf-CEP  
+- 🏷 Multiple version tags (2020 – Latest)
 
 > [!WARNING] 
 > - This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.
 > - If you want to use Sharelatex CE with inner contained LaTeX compile, refer to [Overleaf official](github.com/overleaf/overleaf) to find more tutorials. This repository is for server-pro's Docker Compile.
-> - A long time compile bug [link #1](https://github.com/ayaka-notes/texlive-full/issues/1) has been fixed now(2024.4.17), please update your docker image.
-> - TeXLive 2025 is in beta!(2025.4.17).
 
-## Overleaf-Cep Usage
+
+## Release Notes
+
+- Knitr has been added into the image(2026.1.21), which can support R code compile in LaTeX document.
+- A long time compile bug [link #1](https://github.com/ayaka-notes/texlive-full/issues/1) has been fixed now(2024.4.17)
+- Texlive 2025 image has been added(2024.4.17)
+
+
+## 🎯 Overleaf-CEP Usage
 
 Texlive-full@Ayaka-notes support [overleaf-cep](https://github.com/yu-i-i/overleaf-cep), you can use the following environment variables to `config/variables.env` file if you are [toolkit user](https://github.com/overleaf/toolkit).
 
@@ -21,7 +39,7 @@ TEX_LIVE_DOCKER_IMAGE=ghcr.io/ayaka-notes/texlive-full:2025.1
 If you need more help, refer to [overleaf-cep documentation](https://github.com/yu-i-i/overleaf-cep/wiki/Extended-CE:-Sandboxed-Compiles)
 
 
-## TeXLive Version
+## 📦 Available TeXLive Version
 
 Thanks to Github Action, we can build all tex image parallel, which includes:
 - `ghcr.io/ayaka-notes/texlive-full:2025.1` (Also `latest` tag)
@@ -37,6 +55,9 @@ We use mirror archive from [utah university](https://ftp.math.utah.edu/pub/tex/h
 > Why texlive 2019 and earlier are not supported ?
 >
 > To maintain such images is more than difficult. And we believe you may not use it any more since it's too old. If you need, open a issue to let me know.
+
+> [!TIP]
+> For China mainland users, you can replace `ghcr.io` with `ghcr.nju.edu.cn` to speed up the download.
 
 ## Contained Component
 
@@ -59,17 +80,18 @@ The following fonts are contained in the docker image.
 MIT
 
 
-## Problem 01: Font Cache Miss Problem
+## Known Issues and Solutions
+### Problem 01: Font Cache Miss Problem
 When overleaf compile latex project, if font miss occurs, **you may find the compile progress takes a long time**, that is because when a font is miss, texlive will try to **rebuild the whole font cache**. This is a time-consuming process.
 
 In our image, we have pre-built the font cache, we fix this problem by [this commit](https://github.com/ayaka-notes/texlive-full/commit/0cb66b0dc8b82be628cf6999cfd659d9784e132f)
 
-## Problem 02: Sync Tex Extremely Slow
+### Problem 02: Sync Tex Extremely Slow
 When you use this image in sharelatex, you may find that the sync tex is extremely slow.
 
 See: https://github.com/overleaf/overleaf/issues/1150, just disable http 2.0.
 
-## Problem 03: Re-Compile Error with Official Texlive Image
+### Problem 03: Re-Compile Error with Official Texlive Image
 If you use texlive official image on docker hub `texlive/texlive`, you may find that when you re-compile a project, it will report error. However, in our image, this problem is fixed. Becase we use latest ubuntu base image and install all dependencies from ubuntu official repo.
 
 
