@@ -21,10 +21,12 @@ LABEL \
 COPY LatexMk /usr/local/share/latexmk/LatexMk
 COPY patchSynctex.R /usr/local/bin/
 COPY run-chktex.sh /usr/local/bin/
+COPY ./latexminted /home/tex/
 
 # Set file exec mod
 # -----------------------------------
 RUN chmod +x /usr/local/bin/* && chmod +x /usr/local/share/latexmk/*
+RUN chown -R tex:tex /home/tex/latexminted
 
 
 # ARG For TEXLIVE
