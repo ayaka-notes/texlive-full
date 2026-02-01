@@ -21,7 +21,7 @@ LABEL \
 COPY LatexMk /usr/local/share/latexmk/LatexMk
 COPY patchSynctex.R /usr/local/bin/
 COPY run-chktex.sh /usr/local/bin/
-COPY ./latexminted /home/tex/
+COPY ./latexminted /home/tex/latexminted
 
 # Set file exec mod
 # -----------------------------------
