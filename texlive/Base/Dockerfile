@@ -77,3 +77,18 @@ RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula sele
 && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
 && rm -f gf.tar.gz \
 && fc-cache -f && rm -rf /var/cache/*
+
+
+# Set up tex user and home directory
+# -----------------------------------------
+RUN adduser \
+      --system \
+      --uid 1000 \
+      --group \
+      --home /home/tex \
+      --shell /bin/sh \
+      --gecos "You are in a sandboxed container without access to outside resources ^_^ (From Ayaka-notes)" \
+      --no-create-home \
+      tex && \
+    mkdir -p /home/tex && \
+    chown tex:tex /home/tex
