@@ -23,17 +23,25 @@ LABEL \
     org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.description="Overleaf TeXLive Image by ayaka-notes"
 
-# Makes sure LuaTex cache is writable
-# -----------------------------------
-ENV TEXMFVAR=/tmp/texmf-var
-
 # Set ENV to noninteractive
 # -----------------------------------
 ENV DEBIAN_FRONTEND noninteractive
 
 # Update to ensure dependencies are updated
 # ------------------------------------------
-ENV REBUILT_AFTER="2024-14-02"
+ENV REBUILT_AFTER="2026-01-13"
+
+
+# Set up tex user and home directory (match upstream)
+# ---------------------------------------------------
+RUN set -eux; \
+    groupadd -g 1000 tex; \
+    useradd -m -u 1000 -g 1000 -d /home/tex -s /bin/sh \
+      -c "You are in a sandboxed container without access to outside resources ^_^" \
+      tex; \
+    passwd -d tex; \
+    chmod 750 /home/tex
+
 
 # Install dependencies
 # --------------------
@@ -77,18 +85,3 @@ RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula sele
 && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
 && rm -f gf.tar.gz \
 && fc-cache -f && rm -rf /var/cache/*
-
-
-# Set up tex user and home directory
-# -----------------------------------------
-RUN adduser \
-      --system \
-      --uid 1000 \
-      --group \
-      --home /home/tex \
-      --shell /bin/sh \
-      --gecos "You are in a sandboxed container without access to outside resources ^_^ (From Ayaka-notes)" \
-      --no-create-home \
-      tex && \
-    mkdir -p /home/tex && \
-    chown tex:tex /home/tex
