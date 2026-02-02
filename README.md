@@ -96,6 +96,8 @@ See: https://github.com/overleaf/overleaf/issues/1150, just disable http 2.0.
 ### Problem 03: Re-Compile Error with Official Texlive Image
 If you use texlive official image on docker hub `texlive/texlive`, you may find that when you re-compile a project, it will report error. However, in our image, this problem is fixed. Becase we use latest ubuntu base image and install all dependencies from ubuntu official repo.
 
+### Problem 04: Minted Package Error
+If you use `minted` package in your latex project, you may find that a permission error preventing access to minted config file. Please see [#131](https://github.com/yu-i-i/overleaf-cep/issues/131) for more details.
 
 
 ## Other Tech Reminder
