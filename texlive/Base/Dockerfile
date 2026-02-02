@@ -23,6 +23,11 @@ LABEL \
     org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.description="Overleaf TeXLive Image by ayaka-notes"
 
+# Makes sure LuaTex cache is writable
+# -----------------------------------
+ENV TEXMFVAR=/tmp/texmf-var
+RUN mkdir -p /tmp/texmf-var && chmod -R 777 /tmp
+
 # Set ENV to noninteractive
 # -----------------------------------
 ENV DEBIAN_FRONTEND noninteractive
