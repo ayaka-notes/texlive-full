@@ -29,8 +29,8 @@ RUN chmod +x /usr/local/bin/* && chmod +x /usr/local/share/latexmk/*
 # ARG For TEXLIVE
 # -----------------------------------
 ARG TEXLIVE_Version=2020
-# ARG TEXLIVE_MIRROR=https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
-ARG TEXLIVE_MIRROR=https://texlive.info/tlnet-archive/${TEXLIVE_Version}/06/01/tlnet
+ARG TEXLIVE_MIRROR=https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
+# ARG TEXLIVE_MIRROR=https://texlive.info/tlnet-archive/${TEXLIVE_Version}/06/01/tlnet
 
 
 # Install texlive like Overleaf

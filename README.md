@@ -20,7 +20,6 @@ This image aims to provide an almost complete TeXLive distribution with common f
 
 ## Release Notes
 
-- (2026.2.2): We change texlive mirror to `https://texlive.info` to align with Overleaf official image, also we use **daily-specific** tex live mirror to build image to avoid potential problem.
 - (2026.2.1): We add a `tex` user to align with Overleaf's default compile image.
 - (2026.1.21): Knitr has been added into the image, which can support R code compile in LaTeX document. To find out more, visit [Using R with LaTeX on Overleaf](https://docs.overleaf.com/integrations-and-add-ons/r-code-knitr)
 - (2024.4.17): A long time compile bug [link #1](https://github.com/ayaka-notes/texlive-full/issues/1) has been fixed now
