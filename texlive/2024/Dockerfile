@@ -80,6 +80,14 @@ RUN echo "shell_escape = t" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf &
     echo "openout_any = a" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf && \
     echo "openin_any = a" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf 
 
+# Fix minted bug in texlive 2024
+# -----------------------------------
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip3 install --upgrade pip \
+    && pip3 install latexminted==0.5.1 
 
 # Set PATH ENV
 # -----------------------------------
