@@ -20,6 +20,7 @@ This image aims to provide an almost complete TeXLive distribution with common f
 
 ## Release Notes
 
+- (2026.3.3): TexLive 2026.1 image has been released.
 - (2026.2.1): We add a `tex` user to align with Overleaf's default compile image.
 - (2026.1.21): Knitr has been added into the image, which can support R code compile in LaTeX document. To find out more, visit [Using R with LaTeX on Overleaf](https://docs.overleaf.com/integrations-and-add-ons/r-code-knitr)
 - (2024.4.17): A long time compile bug [link #1](https://github.com/ayaka-notes/texlive-full/issues/1) has been fixed now
@@ -32,9 +33,9 @@ Texlive-full@Ayaka-notes support [overleaf-cep](https://github.com/yu-i-i/overle
 
 For example:
 ```
-ALL_TEX_LIVE_DOCKER_IMAGES=ghcr.io/ayaka-notes/texlive-full:2025.1, ghcr.io/ayaka-notes/texlive-full:2024.1
-ALL_TEX_LIVE_DOCKER_IMAGE_NAMES=Texlive 2025, Texlive 2024
-TEX_LIVE_DOCKER_IMAGE=ghcr.io/ayaka-notes/texlive-full:2025.1
+ALL_TEX_LIVE_DOCKER_IMAGES=ghcr.io/ayaka-notes/texlive-full:2026.1, ghcr.io/ayaka-notes/texlive-full:2025.1
+ALL_TEX_LIVE_DOCKER_IMAGE_NAMES=Texlive 2026, Texlive 2025
+TEX_LIVE_DOCKER_IMAGE=ghcr.io/ayaka-notes/texlive-full:2026.1
 ```
 
 If you need more help, refer to [overleaf-cep documentation](https://github.com/yu-i-i/overleaf-cep/wiki/Extended-CE:-Sandboxed-Compiles)
@@ -43,7 +44,8 @@ If you need more help, refer to [overleaf-cep documentation](https://github.com/
 ## 📦 Available TeXLive Version
 
 Thanks to Github Action, we can build all tex image parallel, which includes:
-- `ghcr.io/ayaka-notes/texlive-full:2025.1` (Also `latest` tag)
+- `ghcr.io/ayaka-notes/texlive-full:2026.1` (Also `latest` tag)
+- `ghcr.io/ayaka-notes/texlive-full:2025.1`
 - `ghcr.io/ayaka-notes/texlive-full:2024.1`
 - `ghcr.io/ayaka-notes/texlive-full:2023.1`
 - `ghcr.io/ayaka-notes/texlive-full:2022.1`
@@ -51,7 +53,7 @@ Thanks to Github Action, we can build all tex image parallel, which includes:
 - `ghcr.io/ayaka-notes/texlive-full:2020.1`
 - `ghcr.io/ayaka-notes/texlive-full:base`
 
-We use mirror archive from [utah university](https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/), which includes almost all texlive image ranging from 1996 to 2024. And thankes to Overleaf's Dockerfile, we can build this project faster.
+We use mirror archive from [utah university](https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/), which includes almost all texlive image ranging from 1996 to 2025. And thankes to Overleaf's Dockerfile, we can build this project faster.
 
 > Why texlive 2019 and earlier are not supported ?
 >

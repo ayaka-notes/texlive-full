@@ -1,6 +1,6 @@
 # Usage:
-# REGISTRY_AND_USER=[] docker-compose build 2024 2023 2022 2021 2020 base slim
-# REGISTRY_AND_USER=[] docker-compose push 2024 2023 2022 2021 2020 base slim
+# REGISTRY_AND_USER=[] docker-compose build 2026 2025 2024 2023 2022 2021 2020 base slim
+# REGISTRY_AND_USER=[] docker-compose push 2026 2025 2024 2023 2022 2021 2020 base slim
 
 
 ##################
@@ -13,6 +13,18 @@
 # 所以，我别无选择，只能使用版本号作为标签。
 
 services:
+  2026:
+    image: ${REGISTRY_AND_USER}/texlive-full:2026.1
+    build:
+      context: ./texlive/2026
+      dockerfile: Dockerfile
+  
+  2025:
+    image: ${REGISTRY_AND_USER}/texlive-full:2025.1
+    build:
+      context: ./texlive/2025
+      dockerfile: Dockerfile
+  
   2024:
     image: ${REGISTRY_AND_USER}/texlive-full:2024.1
     build:
