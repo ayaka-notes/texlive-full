@@ -30,8 +30,8 @@ RUN chmod +x /usr/local/bin/* && chmod +x /usr/local/share/latexmk/*
 # ARG For TEXLIVE
 # -----------------------------------
 ARG TEXLIVE_Version=2024
-ARG TEXLIVE_MIRROR=https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
-# ARG TEXLIVE_MIRROR=https://texlive.info/tlnet-archive/${TEXLIVE_Version}/05/24/tlnet
+# ARG TEXLIVE_MIRROR=https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
+ARG TEXLIVE_MIRROR=https://texlive.info/tlnet-archive/${TEXLIVE_Version}/03/23/tlnet
 
 
 # Install texlive like Overleaf
@@ -79,15 +79,6 @@ RUN fc-cache -fsv
 RUN echo "shell_escape = t" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf && \
     echo "openout_any = a" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf && \
     echo "openin_any = a" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf 
-
-# Fix minted bug in texlive 2024
-# -----------------------------------
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
-RUN pip3 install --upgrade pip \
-    && pip3 install latexminted==0.5.1 
 
 # Set PATH ENV
 # -----------------------------------
