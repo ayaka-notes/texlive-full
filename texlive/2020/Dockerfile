@@ -16,6 +16,11 @@ LABEL \
     org.opencontainers.image.description="Overleaf TeXLive Image by ayaka-notes"
 
 
+# ARCH For TEXLIVE
+# -----------------------------------
+ARG TEXLIVE_BIN_ARCH=x86_64-linux
+
+
 # Copy LatexMk run-chktex.sh file 
 # -----------------------------------
 COPY LatexMk /usr/local/share/latexmk/LatexMk
@@ -81,4 +86,4 @@ RUN echo "shell_escape = t" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf &
 
 # Set PATH ENV
 # -----------------------------------
-ENV PATH="/usr/local/texlive/${TEXLIVE_Version}/bin/x86_64-linux:${PATH}"
+ENV PATH="/usr/local/texlive/${TEXLIVE_Version}/bin/${TEXLIVE_BIN_ARCH}:${PATH}"

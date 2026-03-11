@@ -1,40 +1,129 @@
 name: Build texlive-full(ghcr)
 
 on:
-  # push:
-  #   branches:
-  #     - dev
   workflow_dispatch:
 
 env:
   DOCKER_REGISTRY: ghcr.io
   IMAGE_NAME: ayaka-notes/texlive-full
-  # IMAGE_TAG: base
 
 jobs:
   build-push-image:
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 8
       matrix:
         tex-version: [2020, 2021, 2022, 2023, 2024, 2025, 2026]
+        platform: [linux/amd64, linux/arm64]
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            platform_pair: amd64
+            texlive_bin_arch: x86_64-linux
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            platform_pair: arm64
+            texlive_bin_arch: aarch64-linux
+
+    runs-on: ${{ matrix.runner }}
+
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout GitHub Action
         uses: actions/checkout@main
 
-      - name: 'Login to GitHub Container Registry'
-        uses: docker/login-action@v3.0.0
+      - name: Set up Docker (enable containerd image store)
+        uses: docker/setup-docker-action@v5
+        with:
+          daemon-config: |
+            {
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.DOCKER_REGISTRY }}
-          username: ${{github.actor}}
-          password: ${{secrets.GITHUB_TOKEN}}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
         id: docker_build
-        uses: docker/build-push-action@v5.1.0
+        uses: docker/build-push-action@v7
         with:
           context: texlive/${{ matrix.tex-version }}
           file: texlive/${{ matrix.tex-version }}/Dockerfile
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            TEXLIVE_BIN_ARCH=${{ matrix.texlive_bin_arch }}
           push: true
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex-version }}.1
+          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex-version }}.1.${{ matrix.platform_pair }}
+          outputs: type=image,name-canonical=true,push=true
+          provenance: false
+          sbom: false
+
+      - name: Export digest
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          digest="${{ steps.docker_build.outputs.digest }}"
+          echo "${digest#sha256:}" > "${{ runner.temp }}/digests/${{ matrix.tex-version }}.${{ matrix.platform_pair }}.txt"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.tex-version }}-${{ matrix.platform_pair }}
+          path: ${{ runner.temp }}/digests/${{ matrix.tex-version }}.${{ matrix.platform_pair }}.txt
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: build-push-image
+
+    steps:
+      - name: Download all digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.ORGTOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create and push manifest lists in order
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          DIGEST_DIR="${{ runner.temp }}/digests"
+
+          for year in 2020 2021 2022 2023 2024 2025 2026; do
+
+            AMD_DIGEST=$(cat "${DIGEST_DIR}/${year}.amd64.txt")
+            ARM_DIGEST=$(cat "${DIGEST_DIR}/${year}.arm64.txt")
+
+            echo "========== Merging ${year}.1 =========="
+
+            docker buildx imagetools create \
+              -t ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1 \
+              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1.amd64@sha256:${AMD_DIGEST} \
+              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1.arm64@sha256:${ARM_DIGEST}
+
+            echo "========== Inspecting ${year}.1 =========="
+
+            docker buildx imagetools inspect \
+              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1
+
+          done
