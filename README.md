@@ -15,11 +15,11 @@ This image aims to provide an almost complete TeXLive distribution with common f
 
 > [!WARNING] 
 > - This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.
-> - If you want to use Sharelatex CE with inner contained LaTeX compile, refer to [Overleaf official](github.com/overleaf/overleaf) to find more tutorials. This repository is for server-pro's Docker Compile.
+> - If you want to use Sharelatex CE with inner contained LaTeX compile, refer to [Overleaf official](https://github.com/overleaf/overleaf) to find more tutorials. This repository is for server-pro's Docker Compile.
 
 
 ## Release Notes
-
+- (2026.3.12): Unified arm64 and amd64 images into a single OCI multi-architecture image.
 - (2026.3.3): TexLive 2026.1 image has been released.
 - (2026.2.1): We add a `tex` user to align with Overleaf's default compile image.
 - (2026.1.21): Knitr has been added into the image, which can support R code compile in LaTeX document. To find out more, visit [Using R with LaTeX on Overleaf](https://docs.overleaf.com/integrations-and-add-ons/r-code-knitr)
