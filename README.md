@@ -7,11 +7,12 @@ This image aims to provide an almost complete TeXLive distribution with common f
 
 ## ✨ Features
 
-- 📦 Nearly full TeXLive installation  
-- 🧩 Preinstalled common fonts and utilities  
+- 🚀 Support Both x86_64 and arm64 server
+- 📦 Full and Optimized TeXLive installation
+- 🧩 Preinstalled common fonts and utilities
 - 🐳 Ready to use with Docker and Docker Compose  
-- 🧪 Tested with Overleaf Server Pro / Overleaf-CEP  
-- 🏷 Multiple version tags (2020 – Latest)
+- 🧪 Tested with Overleaf Server Pro / Overleaf Pro  
+- 🏷 Multiple TeXLive Version tags (2020 – Latest)
 
 > [!WARNING] 
 > - This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.

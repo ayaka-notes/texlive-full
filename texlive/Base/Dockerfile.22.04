@@ -1,0 +1,93 @@
+# ---------------------------------------------
+# Overleaf TexLive Base (ayaka-notes/overleaf)
+# Ubuntu 22.04
+# ---------------------------------------------
+
+# ---------------------------------------------
+# How to pull? 
+# $ docker pull ghcr.io/ayaka-notes/texlive-full:base
+# How to build?
+# $ docker build -t ghcr.io/ayaka-notes/texlive-full:base ./texlive/Base
+# ---------------------------------------------
+
+# This Dockerfile is used to build texlive-full:base
+# And texlive:2024, texlive:2023 and so on are all based on this
+# Base Image Contain fonts, apt-installed component
+FROM ubuntu:24.04
+
+# LABEL
+# -----------------------------------
+LABEL \
+    org.opencontainers.image.title="Docker Image of TeXLive" \
+    org.opencontainers.image.authors="ayaka-notes <public@ayaka.space>" \
+    org.opencontainers.image.source="https://github.com/ayaka-notes/texlive-full" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.description="Overleaf TeXLive Image by ayaka-notes"
+
+# Makes sure LuaTex cache is writable
+# -----------------------------------
+ENV TEXMFVAR=/tmp/texmf-var
+RUN mkdir -p /tmp/texmf-var && chmod -R 777 /tmp
+
+# Set ENV to noninteractive
+# -----------------------------------
+ENV DEBIAN_FRONTEND noninteractive
+
+# Update to ensure dependencies are updated
+# ------------------------------------------
+ENV REBUILT_AFTER="2026-01-13"
+
+
+# Set up tex user and home directory (match upstream)
+# ---------------------------------------------------
+RUN set -eux; \
+    groupadd -g 1000 tex; \
+    useradd -m -u 1000 -g 1000 -d /home/tex -s /bin/sh \
+      -c "You are in a sandboxed container without access to outside resources ^_^" \
+      tex; \
+    passwd -d tex; \
+    chmod 750 /home/tex
+
+
+# Install dependencies
+# --------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    fontconfig inkscape pandoc python3-pygments wget python3 \
+    gnupg gnuplot perl-modules perl ca-certificates git ghostscript \
+    qpdf tar make \
+    \
+    # R
+    r-base r-base-dev \
+    build-essential gfortran pkg-config \
+    \
+    # common libs that many R packages need
+    libcurl4-openssl-dev libssl-dev libxml2-dev \
+    libcairo2-dev libpango1.0-dev \
+    libfontconfig1-dev libfreetype6-dev \
+    libjpeg-dev libpng-dev libtiff5-dev \
+    libharfbuzz-dev libfribidi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install R packages (one shot, non-interactive, pinned repo)
+# --------------------
+RUN Rscript -e "options(repos=c(CRAN='https://cloud.r-project.org')); \
+    pkgs <- c('knitr','rmarkdown','tinytex'); \
+    install.packages(pkgs, Ncpus=max(1, parallel::detectCores()-1)); \
+    sapply(pkgs, requireNamespace, quietly=TRUE) |> stopifnot()"
+
+# Install Extra fonts
+COPY ./extrafonts /usr/share/fonts/
+
+
+# Install fonts
+# --------------------
+RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+&& apt-get update && apt-get install -y ttf-mscorefonts-installer \
+&& apt update && apt search ^fonts | grep -o '^fonts[^/]*' | xargs apt install -y \
+&& wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
+&& rm -rf /var/lib/apt/lists/* \
+&& tar -xf gf.tar.gz \
+&& mkdir -p /usr/share/fonts/truetype/google-fonts \
+&& find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
+&& rm -f gf.tar.gz \
+&& fc-cache -f && rm -rf /var/cache/*
