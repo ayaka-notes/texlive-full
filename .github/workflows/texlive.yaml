@@ -77,6 +77,9 @@ jobs:
           outputs: type=image,name-canonical=true,push=true
           provenance: false
           sbom: false
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:cache-base-${{ matrix.ubuntu_version }}-${{ matrix.platform_pair }}
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:cache-base-${{ matrix.ubuntu_version }}-${{ matrix.platform_pair }},mode=max
+
       - name: Export digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
@@ -138,10 +141,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tex_version: ${{ fromJson(inputs.texlive_versions) }}
-        platform_pair: [amd64, arm64]
+        tex-version: ${{ fromJson(inputs.texlive_versions) }}
+        platform: [linux/amd64, linux/arm64]
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            platform_pair: amd64
+            texlive_bin_arch: x86_64-linux
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            platform_pair: arm64
+            texlive_bin_arch: aarch64-linux
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     needs:
       - merge-base
 
@@ -177,10 +189,12 @@ jobs:
           build-args: |
             TEXLIVE_BIN_ARCH=${{ matrix.texlive_bin_arch }}
           push: true
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex-version }}.1.${{ matrix.platform_pair }}
+          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${{ matrix.tex-version }}.1.${{ matrix.platform_pair }}
           outputs: type=image,name-canonical=true,push=true
           provenance: false
           sbom: false
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:cache-texlive-${{ matrix.tex-version }}-${{ matrix.platform_pair }}
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:cache-texlive-${{ matrix.tex-version }}-${{ matrix.platform_pair }},mode=max
 
       - name: Export digest
         run: |
@@ -234,13 +248,13 @@ jobs:
             echo "========== Merging ${year}.1 =========="
 
             docker buildx imagetools create \
-              -t ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1 \
-              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1.amd64@sha256:${AMD_DIGEST} \
-              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1.arm64@sha256:${ARM_DIGEST}
+              -t ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${year}.1 \
+              ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${year}.1.amd64@sha256:${AMD_DIGEST} \
+              ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${year}.1.arm64@sha256:${ARM_DIGEST}
 
             echo "========== Inspecting ${year}.1 =========="
 
             docker buildx imagetools inspect \
-              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1
+              ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${year}.1
 
           done
