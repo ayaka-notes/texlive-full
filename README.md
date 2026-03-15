@@ -48,7 +48,7 @@ Thanks to Github Action, we can build all tex image parallel, which includes:
 
 | TeXLive Version | Base OS | Architecture | Docker Image | Release Status |
 |:---------------:|:-------:|:------------:|:---------:|:---------------:|
-| 2026 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2026.1` | Beta |
+| 2026 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2026.1` | Daily/Beta |
 | 2025 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2025.1` | Final |
 | 2024 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2024.1` | Final |
 | 2023 | Ubuntu 22.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2023.1` | Final |
