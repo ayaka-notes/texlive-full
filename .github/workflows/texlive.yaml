@@ -2,19 +2,23 @@ name: Build texlive-full
 
 on:
   workflow_dispatch:
+    inputs:
+      ubuntu_versions:
+        description: JSON array of Ubuntu versions
+        required: false
+        default: '["24.04"]'
 
 env:
   DOCKER_REGISTRY: ghcr.io
   BASE_IMAGE_NAME: ayaka-notes/texlive-full
   BASE_IMAGE_TAG_PREFIX: base
-  UBUNTU_VERSIONS: '["24.04"]'
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        ubuntu_version: ${{ fromJson(env.UBUNTU_VERSIONS) }}
+        ubuntu_version: ${{ fromJson(inputs.ubuntu_versions) }}
         platform: [linux/amd64, linux/arm64]
         include:
           - platform: linux/amd64
@@ -91,7 +95,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ubuntu_version: ${{ fromJson(env.UBUNTU_VERSIONS) }}
+        ubuntu_version: ${{ fromJson(inputs.ubuntu_versions) }}
 
     steps:
       - name: Download digests
