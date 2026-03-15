@@ -80,7 +80,7 @@ COPY ./extrafonts /usr/share/fonts/
 # --------------------
 RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
 && apt-get update && apt-get install -y ttf-mscorefonts-installer \
-&& apt update && apt search ^fonts | grep -o '^fonts[^/]*' | xargs apt install -y \
+&& apt update && apt search ^fonts  | grep -o '^fonts[^/]*' | grep -vE '^(fonts-ubuntu-classic)$' | xargs apt-get install -y \
 && wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
 && rm -rf /var/lib/apt/lists/* \
 && tar -xf gf.tar.gz \
