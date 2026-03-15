@@ -62,9 +62,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install R packages (one shot, non-interactive, pinned repo)
 # --------------------
-COPY ./R_ubuntu_24.04.R /tmp/install_r_packages.R
+COPY ./install-r-package-24.04.R /tmp/install_r_packages.R
 RUN Rscript /tmp/install_r_packages.R && rm -f /tmp/install_r_packages.R
-
 
 
 # Install Extra fonts
