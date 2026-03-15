@@ -631,13 +631,15 @@ lines <- lines[nchar(lines) > 0]
 pkg <- sub(" .*", "", lines)
 ver <- sub(".* ", "", lines)
 
+repo <- "https://packagemanager.posit.co/cran/2022-06-17"
+
 # 安装
 for(i in seq_along(pkg)){
   cat("Installing", pkg[i], ver[i], "\n")
   try(remotes::install_version(
       pkg[i],
       version = ver[i],
-      repos = "https://cloud.r-project.org",
+      repos = repo,
       lib = "/usr/local/lib/R/site-library",
       Ncpus = parallel::detectCores()
   ))
