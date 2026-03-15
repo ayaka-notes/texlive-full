@@ -4,7 +4,7 @@
 
 # Use base image, see texlive/base
 # -----------------------------------
-FROM ghcr.io/ayaka-notes/texlive-full:base
+FROM ghcr.io/ayaka-notes/texlive-full:base-22.04
 
 # LABEL
 # -----------------------------------

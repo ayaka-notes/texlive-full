@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       ubuntu_versions:
-        description: JSON array of Ubuntu versions for Base image (e.g., '["20.04", "22.04", "24.04"]')
+        description: JSON array of Ubuntu versions for Base image (e.g., '["22.04", "24.04"]')
         required: false
         default: '["20.04", "22.04", "24.04"]'
+      texlive_versions:
+        description: JSON array of TeX Live versions to build (e.g., '["2025", "2026"]')
+        required: false
+        default: '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]'
 
 env:
   DOCKER_REGISTRY: ghcr.io
@@ -14,7 +18,7 @@ env:
   BASE_IMAGE_TAG_PREFIX: base
 
 jobs:
-  build:
+  build-base:
     strategy:
       fail-fast: false
       matrix:
@@ -87,10 +91,10 @@ jobs:
           if-no-files-found: error
           retention-days: 1
   
-  merge:
+  merge-base:
     runs-on: ubuntu-latest
     needs:
-      - build
+      - build-base
 
     strategy:
       fail-fast: false
@@ -129,3 +133,114 @@ jobs:
         run: |
           docker buildx imagetools inspect \
             ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_TAG_PREFIX }}-${{ matrix.ubuntu_version }}
+
+  build-texlive:
+    strategy:
+      fail-fast: false
+      matrix:
+        tex_version: ${{ fromJson(inputs.texlive_versions) }}
+        platform_pair: [amd64, arm64]
+
+    runs-on: ubuntu-latest
+    needs:
+      - merge-base
+
+    steps:
+      - name: Checkout GitHub Action
+        uses: actions/checkout@main
+        with:
+          submodules: true
+          token: ${{ secrets.ORGTOKEN }}
+
+      - name: Update for Latest
+        run: |
+          git submodule update --remote --recursive
+          tree .
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        id: docker_build
+        uses: docker/build-push-action@v7
+        with:
+          context: texlive/${{ matrix.tex-version }}
+          file: texlive/${{ matrix.tex-version }}/Dockerfile
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            TEXLIVE_BIN_ARCH=${{ matrix.texlive_bin_arch }}
+          push: true
+          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex-version }}.1.${{ matrix.platform_pair }}
+          outputs: type=image,name-canonical=true,push=true
+          provenance: false
+          sbom: false
+
+      - name: Export digest
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          digest="${{ steps.docker_build.outputs.digest }}"
+          echo "${digest#sha256:}" > "${{ runner.temp }}/digests/${{ matrix.tex-version }}.${{ matrix.platform_pair }}.txt"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.tex-version }}-${{ matrix.platform_pair }}
+          path: ${{ runner.temp }}/digests/${{ matrix.tex-version }}.${{ matrix.platform_pair }}.txt
+          if-no-files-found: error
+          retention-days: 1
+  
+  merge-texlive:
+    runs-on: ubuntu-latest
+    needs:
+      - build-texlive
+
+
+    steps:
+      - name: Download all digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.ORGTOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create and push manifest lists in order
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          DIGEST_DIR="${{ runner.temp }}/digests"
+
+          for year in $(echo '${{ inputs.texlive_versions }}' | jq -r '.[]'); do
+
+            AMD_DIGEST=$(cat "${DIGEST_DIR}/${year}.amd64.txt")
+            ARM_DIGEST=$(cat "${DIGEST_DIR}/${year}.arm64.txt")
+
+            echo "========== Merging ${year}.1 =========="
+
+            docker buildx imagetools create \
+              -t ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1 \
+              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1.amd64@sha256:${AMD_DIGEST} \
+              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1.arm64@sha256:${ARM_DIGEST}
+
+            echo "========== Inspecting ${year}.1 =========="
+
+            docker buildx imagetools inspect \
+              ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${year}.1
+
+          done
