@@ -28,7 +28,7 @@ This image aims to provide an almost complete TeXLive distribution with common f
 - (2024.4.17): Texlive 2025 image has been added
 
 
-## 🎯 Overleaf-CEP Usage
+## 🎯 Overleaf Pro Usage
 
 Texlive-full@Ayaka-notes support [overleaf-cep](https://github.com/yu-i-i/overleaf-cep), you can use the following environment variables to `config/variables.env` file if you are [toolkit user](https://github.com/overleaf/toolkit).
 
@@ -39,20 +39,23 @@ ALL_TEX_LIVE_DOCKER_IMAGE_NAMES=Texlive 2026, Texlive 2025
 TEX_LIVE_DOCKER_IMAGE=ghcr.io/ayaka-notes/texlive-full:2026.1
 ```
 
-If you need more help, refer to [overleaf-cep documentation](https://github.com/yu-i-i/overleaf-cep/wiki/Extended-CE:-Sandboxed-Compiles)
+If you need more help, refer to [overleaf pro documentation](https://overleaf-pro.ayaka.space/on-premises/configuration/overleaf-toolkit/sandboxed-compiles)
 
 
 ## 📦 Available TeXLive Version
 
 Thanks to Github Action, we can build all tex image parallel, which includes:
-- `ghcr.io/ayaka-notes/texlive-full:2026.1` (Also `latest` tag)
-- `ghcr.io/ayaka-notes/texlive-full:2025.1`
-- `ghcr.io/ayaka-notes/texlive-full:2024.1`
-- `ghcr.io/ayaka-notes/texlive-full:2023.1`
-- `ghcr.io/ayaka-notes/texlive-full:2022.1`
-- `ghcr.io/ayaka-notes/texlive-full:2021.1`
-- `ghcr.io/ayaka-notes/texlive-full:2020.1`
-- `ghcr.io/ayaka-notes/texlive-full:base`
+
+| TeXLive Version | Base OS | Architecture | Docker Image | Release Status |
+|:---------------:|:-------:|:------------:|:---------:|:---------------:|
+| 2026 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2026.1` | Beta |
+| 2025 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2025.1` | Final |
+| 2024 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2024.1` | Final |
+| 2023 | Ubuntu 22.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2023.1` | Final |
+| 2022 | Ubuntu 22.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2022.1` | Final |
+| 2021 | Ubuntu 20.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2021.1` | Final |
+| 2020 | Ubuntu 20.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2020.1` | Final |
+
 
 We use mirror archive from [utah university](https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/), which includes almost all texlive image ranging from 1996 to 2025. And thankes to Overleaf's Dockerfile, we can build this project faster.
 
