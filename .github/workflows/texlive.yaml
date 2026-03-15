@@ -6,7 +6,7 @@ on:
       ubuntu_versions:
         description: JSON array of Ubuntu versions for Base image (e.g., '["20.04", "22.04", "24.04"]')
         required: false
-        default: '["24.04"]'
+        default: '["20.04", "22.04", "24.04"]'
 
 env:
   DOCKER_REGISTRY: ghcr.io

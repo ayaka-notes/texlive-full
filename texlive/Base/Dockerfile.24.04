@@ -47,8 +47,8 @@ RUN set -eux; \
     if [ -n "$group" ]; then groupdel "$group"; fi; \
     groupadd -g 1000 tex; \
     useradd -m -u 1000 -g 1000 -d /home/tex -s /bin/sh \
-      -c "You are in a sandboxed container without access to outside resources ^_^" \
-      tex; \
+    -c "You are in a sandboxed container without access to outside resources ^_^" \
+    tex; \
     passwd -d tex; \
     chmod 750 /home/tex
 
@@ -79,12 +79,12 @@ COPY ./extrafonts /usr/share/fonts/
 # Install fonts
 # --------------------
 RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-&& apt-get update && apt-get install -y ttf-mscorefonts-installer \
-&& apt update && apt search ^fonts  | grep -o '^fonts[^/]*' | grep -vE '^(fonts-ubuntu-classic)$' | xargs apt-get install -y \
-&& wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
-&& rm -rf /var/lib/apt/lists/* \
-&& tar -xf gf.tar.gz \
-&& mkdir -p /usr/share/fonts/truetype/google-fonts \
-&& find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
-&& rm -f gf.tar.gz \
-&& fc-cache -f && rm -rf /var/cache/*
+    && apt-get update && apt-get install -y ttf-mscorefonts-installer \
+    && apt update && apt search ^fonts  | grep -o '^fonts[^/]*' | grep -vE '^(fonts-ubuntu-classic)$' | xargs apt-get install -y \
+    && wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
+    && rm -rf /var/lib/apt/lists/* \
+    && tar -xf gf.tar.gz \
+    && mkdir -p /usr/share/fonts/truetype/google-fonts \
+    && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
+    && rm -f gf.tar.gz \
+    && fc-cache -f && rm -rf /var/cache/*
