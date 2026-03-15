@@ -58,10 +58,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libmagick++-dev libbz2-dev libpcre2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install R packages (one shot, non-interactive, pinned repo)
-# --------------------
-COPY ./install-r-package-20.04.R /tmp/install_r_packages.R
-RUN Rscript /tmp/install_r_packages.R && rm -f /tmp/install_r_packages.R
 
 # Install Extra fonts
 COPY ./extrafonts /usr/share/fonts/
@@ -70,12 +66,21 @@ COPY ./extrafonts /usr/share/fonts/
 # Install fonts
 # --------------------
 RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-    && apt-get update && apt-get install -y ttf-mscorefonts-installer \
-    && apt update && apt search ^fonts | grep -o '^fonts[^/]*' | xargs apt install -y \
-    && wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
+    && apt-get update && apt-get install -y --no-install-recommends ttf-mscorefonts-installer \
+    && apt-get update \
+    && apt-cache search '^fonts-' | awk '{print $1}' \
+       | grep -vE '^(fonts-mathematica)$' \
+       | xargs -r apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
+    && wget --quiet https://github.com/google/fonts/archive/main.tar.gz -O gf.tar.gz \
     && tar -xf gf.tar.gz \
     && mkdir -p /usr/share/fonts/truetype/google-fonts \
-    && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
+    && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; \
     && rm -f gf.tar.gz \
     && fc-cache -f && rm -rf /var/cache/*
+
+
+# Install R packages (one shot, non-interactive, pinned repo)
+# --------------------
+COPY ./install-r-package-20.04.R /tmp/install_r_packages.R
+RUN Rscript /tmp/install_r_packages.R && rm -f /tmp/install_r_packages.R

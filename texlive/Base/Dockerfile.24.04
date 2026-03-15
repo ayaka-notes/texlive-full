@@ -59,17 +59,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt base-files base-passwd bash bsdutils chktex coreutils culmus dash debconf debianutils default-jdk-headless diffutils dirmngr dot2tex dpkg e2fsprogs findutils gcc-14-base ghostscript gnuplot gpgv graphviz grep gsfonts gzip hostname imagemagick init-system-helpers inkscape libacl1 libapt-pkg6.0t64 libassuan0 libattr1 libaudit-common libaudit1 libblkid1 libbz2-1.0 libc-bin libc6 libcap-ng0 libcap2 libcom-err2 libcrypt1 libcurl4t64 libdebconfclient0 libexpat1 libext2fs2t64 libffi8 libfftw3-bin libfontconfig1 libfreetype6 libgcc-s1 libgcrypt20 libgdal34t64 libglut3.12 libgmp10 libgnutls30t64 libgpg-error0 libgsl27 libhogweed6t64 libidn12 libidn2-0 libijs-0.35 libjbig2dec0 libjpeg8 liblcms2-2 liblz4-1 liblzma5 libmagick++-6.q16-9t64 libmagick++-6.q16hdri-9t64 libmd0 libmount1 libncurses6 libncursesw6 libnettle8t64 libnpth0t64 libopenjp2-7 libosmesa6 libp11-kit0 libpam-modules libpam-modules-bin libpam-runtime libpam0g libpaper1 libpcre2-8-0 libpng16-16t64 libproc2-0 libseccomp2 libselinux1 libsemanage-common libsemanage2 libsepol2 libsmartcols1 libss2 libssl3t64 libstdc++6 libsystemd0 libtasn1-6 libtiff6 libtinfo6 libudev1 libudunits2-0 libunistring5 libuuid1 libxml2 libxxhash0 libzstd1 login logsave mawk mount ncurses-base ncurses-bin passwd perl perl-base procps python-is-python3 python3-numpy python3-pdfrw python3-pygments python3-scipy python3-simpy qpdf r-base r-base-core sed sensible-utils software-properties-common strace sysvinit-utils t1-cyrillic tar time ttf-bitstream-vera ttf-mscorefonts-installer ubuntu-keyring unminimize util-linux wget zlib1g make build-essential gfortran\
     && rm -rf /var/lib/apt/lists/*
 
-
-# Install R packages (one shot, non-interactive, pinned repo)
-# --------------------
-COPY ./install-r-package-24.04.R /tmp/install_r_packages.R
-RUN Rscript /tmp/install_r_packages.R && rm -f /tmp/install_r_packages.R
-
-
 # Install Extra fonts
 # --------------------
 COPY ./extrafonts /usr/share/fonts/
-
 
 # Install fonts
 # --------------------
@@ -83,3 +75,8 @@ RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula sele
     && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
     && rm -f gf.tar.gz \
     && fc-cache -f && rm -rf /var/cache/*
+
+# Install R packages (one shot, non-interactive, pinned repo)
+# --------------------
+COPY ./install-r-package-24.04.R /tmp/install_r_packages.R
+RUN Rscript /tmp/install_r_packages.R && rm -f /tmp/install_r_packages.R
