@@ -7,13 +7,14 @@ env:
   DOCKER_REGISTRY: ghcr.io
   BASE_IMAGE_NAME: ayaka-notes/texlive-full
   BASE_IMAGE_TAG_PREFIX: base
+  UBUNTU_VERSIONS: '["24.04"]'
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        ubuntu_version: [16.04, 18.04, 20.04, 22.04, 24.04]
+        ubuntu_version: ${{ fromJson(env.UBUNTU_VERSIONS) }}
         platform: [linux/amd64, linux/arm64]
         include:
           - platform: linux/amd64
@@ -90,7 +91,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ubuntu_version: [16.04, 18.04, 20.04, 22.04, 24.04]
+        ubuntu_version: ${{ fromJson(env.UBUNTU_VERSIONS) }}
 
     steps:
       - name: Download digests

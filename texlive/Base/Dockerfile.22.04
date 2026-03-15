@@ -7,7 +7,7 @@
 # How to pull? 
 # $ docker pull ghcr.io/ayaka-notes/texlive-full:base
 # How to build?
-# $ docker build -t ghcr.io/ayaka-notes/texlive-full:base ./texlive/Base
+# $ docker build -t ghcr.io/ayaka-notes/texlive-full:base -f ./texlive/Base/Dockerfile.22.04 ./texlive/Base
 # ---------------------------------------------
 
 # This Dockerfile is used to build texlive-full:base
