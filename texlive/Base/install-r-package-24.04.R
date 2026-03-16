@@ -733,3 +733,31 @@ for(i in seq_along(pkg)){
       Ncpus = parallel::detectCores()
   ))
 }
+
+# 检查
+cat("\n===== Checking installed packages =====\n")
+
+ip <- installed.packages(lib.loc = "/usr/local/lib/R/site-library")
+
+missing <- c()
+
+for(i in seq_along(pkg)){
+  p <- pkg[i]
+  v <- ver[i]
+
+  if(!(p %in% rownames(ip))){
+    missing <- c(missing, sprintf("%s %s (not installed)", p, v))
+  } else {
+    installed_v <- ip[p, "Version"]
+    if(installed_v != v){
+      missing <- c(missing, sprintf("%s %s (installed %s)", p, v, installed_v))
+    }
+  }
+}
+
+if(length(missing) == 0){
+  cat("All packages installed correctly\n")
+} else {
+  cat("Packages missing or wrong version:\n")
+  cat(paste(missing, collapse = "\n"), "\n")
+}
