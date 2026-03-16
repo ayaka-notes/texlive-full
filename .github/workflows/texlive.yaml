@@ -9,16 +9,18 @@ on:
         default: '["20.04", "22.04", "24.04"]'
       base_cache:
         description: Whether to enable cache for Base image builds (true/false)
-        required: false
-        default: 'true'
+        required: true
+        type: boolean
+        default: true
       texlive_versions:
         description: JSON array of TeX Live versions to build (e.g., '["2025", "2026"]')
         required: false
         default: '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]'
       texlive_cache:
         description: Whether to enable cache for TeX Live image builds (true/false)
-        required: false
-        default: 'true'
+        required: true
+        type: boolean
+        default: true
 
 env:
   DOCKER_REGISTRY: ghcr.io
@@ -85,7 +87,7 @@ jobs:
           outputs: type=image,name-canonical=true,push=true
           provenance: false
           sbom: false
-          no-cache: ${{ inputs.base_cache == 'false' }}
+          no-cache: ${{ !inputs.base_cache }}
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:cache-base-${{ matrix.ubuntu_version }}-${{ matrix.platform_pair }}
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:cache-base-${{ matrix.ubuntu_version }}-${{ matrix.platform_pair }},mode=max
 
@@ -207,7 +209,7 @@ jobs:
           outputs: type=image,name-canonical=true,push=true
           provenance: false
           sbom: false
-          no-cache: ${{ inputs.texlive_cache == 'false' }}
+          no-cache: ${{ !inputs.texlive_cache }}
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:cache-texlive-${{ matrix.tex-version }}-${{ matrix.platform_pair }}
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:cache-texlive-${{ matrix.tex-version }}-${{ matrix.platform_pair }},mode=max
 
