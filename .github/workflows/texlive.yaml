@@ -206,7 +206,7 @@ jobs:
             TEXLIVE_BIN_ARCH=${{ matrix.texlive_bin_arch }}
           push: true
           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${{ matrix.tex-version }}.1.${{ matrix.platform_pair }}
-          outputs: type=image,name-canonical=true,push=true
+          outputs: type=image,name-canonical=true,push=true,oci-mediatypes=true
           provenance: false
           sbom: false
           no-cache: ${{ !inputs.texlive_cache }}
