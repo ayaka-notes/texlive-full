@@ -85,3 +85,8 @@ RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula sele
 # --------------------
 COPY ./install-r-package-20.04.R /tmp/install_r_packages.R
 RUN Rscript /tmp/install_r_packages.R && rm -f /tmp/install_r_packages.R
+
+
+# LANG=C.UTF−8 for R knitr
+# --------------------
+ENV LANG=C.UTF-8
