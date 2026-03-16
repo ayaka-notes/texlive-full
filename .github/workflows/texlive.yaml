@@ -140,6 +140,7 @@ jobs:
   build-texlive:
     strategy:
       fail-fast: false
+      max-parallel: 6
       matrix:
         tex-version: ${{ fromJson(inputs.texlive_versions) }}
         platform: [linux/amd64, linux/arm64]
