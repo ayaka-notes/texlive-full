@@ -129,6 +129,10 @@ jobs:
           ARM64_DIGEST=$(find . -name arm64.txt -exec cat {} \;)
 
           docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.title=texlive-full-base" \
+            --annotation "index:org.opencontainers.image.description=Base image for TeX Live full image for Overleaf, maintained by ayaka-notes. Multi-arch support for amd64 and arm64." \
+            --annotation "index:org.opencontainers.image.source=https://github.com/ayaka-notes/texlive-full" \
+            --annotation "index:org.opencontainers.image.version=${{ matrix.ubuntu_version }}" \
             -t ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_TAG_PREFIX }}-${{ matrix.ubuntu_version }} \
             ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_TAG_PREFIX }}-${{ matrix.ubuntu_version }}-amd64@sha256:${AMD64_DIGEST} \
             ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_TAG_PREFIX }}-${{ matrix.ubuntu_version }}-arm64@sha256:${ARM64_DIGEST}
@@ -140,7 +144,7 @@ jobs:
   build-texlive:
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 8
       matrix:
         tex-version: ${{ fromJson(inputs.texlive_versions) }}
         platform: [linux/amd64, linux/arm64]
@@ -249,6 +253,10 @@ jobs:
             echo "========== Merging ${year}.1 =========="
 
             docker buildx imagetools create \
+              --annotation "index:org.opencontainers.image.title=texlive-full" \
+              --annotation "index:org.opencontainers.image.description=TeX Live ${year}.1 full image for Overleaf, maintained by ayaka-notes. Multi-arch support for amd64 and arm64." \
+              --annotation "index:org.opencontainers.image.source=https://github.com/ayaka-notes/texlive-full" \
+              --annotation "index:org.opencontainers.image.version=${year}.1" \
               -t ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${year}.1 \
               ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${year}.1.amd64@sha256:${AMD_DIGEST} \
               ${{ env.DOCKER_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:${year}.1.arm64@sha256:${ARM_DIGEST}
