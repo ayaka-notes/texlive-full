@@ -73,6 +73,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
 
       - name: Build and push arch image
         id: build_base
@@ -132,6 +135,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
 
       - name: Create multi-arch manifest and push
         working-directory: ${{ runner.temp }}/digests
@@ -194,6 +200,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
 
       - name: Build and push Docker image
         id: docker_build
@@ -249,6 +258,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
 
       - name: Create and push manifest lists in order
         shell: bash
