@@ -423,15 +423,32 @@ ver <- sub(".* ", "", lines)
 
 repo <- "https://packagemanager.posit.co/cran/2020-07-22"
 
-# 安装
-for(i in seq_along(pkg)){
+# 一次性取出 apt 里所有 r-cran-* 包
+apt_pkgs <- system2("apt-cache", c("pkgnames", "r-cran-"), stdout = TRUE)
+
+# 哪些包能走 apt
+is_apt <- paste0("r-cran-", tolower(pkg)) %in% apt_pkgs
+
+# apt 的一次性安装
+if (any(is_apt)) {
+  cat("APT installing:\n")
+  cat(paste(pkg[is_apt], collapse = "\n"), "\n")
+  try(system2(
+    "apt",
+    c("install", "-y", "--no-install-recommends",
+      paste0("r-cran-", tolower(pkg[is_apt])))
+  ))
+}
+
+# 剩下的再源码安装
+for(i in which(!is_apt)){
   cat("Installing", pkg[i], ver[i], "\n")
   try(remotes::install_version(
-      pkg[i],
-      version = ver[i],
-      repos = repo,
-      lib = "/usr/local/lib/R/site-library",
-      Ncpus = parallel::detectCores()
+    pkg[i],
+    version = ver[i],
+    repos = repo,
+    lib = "/usr/local/lib/R/site-library",
+    Ncpus = parallel::detectCores()
   ))
 }
 
