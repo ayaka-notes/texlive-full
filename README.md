@@ -1,18 +1,22 @@
-# TeXLive-Full Edition
+# Overleaf TeXLive Full
 
-A fully-featured **TeXLive Docker image** designed for Overleaf Server Pro, Overleaf-CEP, and standalone LaTeX compilation environments.
+A fully-featured **TeXLive Docker image** designed for sandboxed LaTeX compilation in
+Overleaf Pro, Overleaf CEP, or standalone LaTeX compilation environments.
 
 This image aims to provide an almost complete TeXLive distribution with common fonts and tools preinstalled, in order to minimize compilation failures caused by missing packages or fonts.
 
 
 ## ✨ Features
 
-- 🚀 Support Both x86_64 and arm64 server
+- 🚀 Support Both x86_64 and arm64 server architectures
 - 📦 Full and Optimized TeXLive installation
 - 🧩 Preinstalled common fonts and utilities
 - 🐳 Ready to use with Docker and Docker Compose  
 - 🧪 Tested with Overleaf Server Pro / Overleaf Pro  
+- 🔄 Regularly Updated with Latest TeXLive Releases
 - 🏷 Multiple TeXLive Version tags (2020 – Latest)
+- 🧑‍🔬 Knitr support for R code in LaTeX documents
+
 
 > [!WARNING] 
 > - This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.
