@@ -1,7 +1,9 @@
 # CPU 核心检测
 cores <- parallel::detectCores()
 cat("Detected CPU cores:", cores, "\n")
-Sys.setenv(MAKEFLAGS = paste0("-j", cores))
+# 使用两倍并行
+jobs <- cores * 2
+Sys.setenv(MAKEFLAGS = paste0("-j", jobs))
 cat("MAKEFLAGS =", Sys.getenv("MAKEFLAGS"), "\n")
 
 # 如果没有 remotes 就安装

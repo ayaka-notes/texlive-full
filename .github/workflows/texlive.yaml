@@ -161,7 +161,7 @@ jobs:
   build-texlive:
     strategy:
       fail-fast: false
-      max-parallel: 8
+      # max-parallel: 8
       matrix:
         tex-version: ${{ fromJson(inputs.texlive_versions) }}
         platform: [linux/amd64, linux/arm64]
@@ -180,6 +180,9 @@ jobs:
       - merge-base
 
     steps:
+      - name: Rand Wait to Avoid Thundering Herd
+        run: sleep $((RANDOM % 500 + 1))
+
       - name: Checkout GitHub Action
         uses: actions/checkout@main
         with:
