@@ -435,17 +435,24 @@ for(i in seq_along(pkg)){
   ))
 }
 
-# 安装
-# for(i in seq_along(pkg)){
-#   cat("Installing", pkg[i], ver[i], "\n")
-#   try(remotes::install_version(
-#       pkg[i],
-#       version = ver[i],
-#       repos = "https://cloud.r-project.org",
-#       lib = "/usr/local/lib/R/site-library",
-#       Ncpus = parallel::detectCores()
-#   ))
-# }
+# 安装 BIO 系列包
+bioc_avail <- BiocManager::available()
+is_bioc <- pkg %in% bioc_avail
+
+if (any(is_bioc)) {
+  options(repos = BiocManager::repositories())
+  for (i in which(is_bioc)) {
+    cat("Installing Bioconductor package", pkg[i], ver[i], "\n")
+    try(
+      BiocManager::install(
+        pkg[i],
+        lib = "/usr/local/lib/R/site-library",
+        ask = FALSE,
+        update = FALSE
+      )
+    )
+  }
+}
 
 
 # 检查

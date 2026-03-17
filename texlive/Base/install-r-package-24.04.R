@@ -742,6 +742,25 @@ for(i in seq_along(pkg)){
   ))
 }
 
+# 安装 BIO 系列包
+bioc_avail <- BiocManager::available()
+is_bioc <- pkg %in% bioc_avail
+
+if (any(is_bioc)) {
+  options(repos = BiocManager::repositories())
+  for (i in which(is_bioc)) {
+    cat("Installing Bioconductor package", pkg[i], ver[i], "\n")
+    try(
+      BiocManager::install(
+        pkg[i],
+        lib = "/usr/local/lib/R/site-library",
+        ask = FALSE,
+        update = FALSE
+      )
+    )
+  }
+}
+
 # 检查
 cat("\n===== Checking installed packages =====\n")
 
