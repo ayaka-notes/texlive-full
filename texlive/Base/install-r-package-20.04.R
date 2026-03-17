@@ -475,7 +475,7 @@ if (any(is_bioc)) {
 # 检查
 cat("\n===== Checking installed packages =====\n")
 
-ip <- installed.packages(lib.loc = "/usr/local/lib/R/site-library")
+ip <- installed.packages()
 
 missing <- c()
 
