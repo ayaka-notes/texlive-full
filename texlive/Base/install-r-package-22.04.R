@@ -1,3 +1,9 @@
+# CPU 核心检测
+cores <- parallel::detectCores()
+cat("Detected CPU cores:", cores, "\n")
+Sys.setenv(MAKEFLAGS = paste0("-j", cores))
+cat("MAKEFLAGS =", Sys.getenv("MAKEFLAGS"), "\n")
+
 # 如果没有 remotes 就安装
 if (!requireNamespace("remotes", quietly = TRUE))
   install.packages("remotes", repos="https://cloud.r-project.org")
