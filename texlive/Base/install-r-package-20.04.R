@@ -8,7 +8,18 @@ cat("MAKEFLAGS =", Sys.getenv("MAKEFLAGS"), "\n")
 
 # 如果没有 remotes 就安装
 if (!requireNamespace("remotes", quietly = TRUE))
-  install.packages("remotes", repos="https://cloud.r-project.org")
+  install.packages("remotes", repos="https://packagemanager.posit.co/cran/2020-07-22")
+
+# 安装 BiocManager 包
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  remotes::install_version(
+    "BiocManager",
+    version = "1.30.10",
+    repos = "https://packagemanager.posit.co/cran/2022-06-17",
+    lib = "/usr/local/lib/R/site-library",
+    Ncpus = parallel::detectCores(),
+    upgrade = "never"
+  )
 
 # 把你的包列表直接粘到这里
 txt <- "
