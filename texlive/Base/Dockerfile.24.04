@@ -82,7 +82,7 @@ RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula sele
 # Install R packages (one shot, non-interactive, pinned repo)
 # --------------------
 COPY ./install-r-package-24.04.R /tmp/install_r_packages.R
-RUN apt-get update && Rscript /tmp/install_r_packages.R && rm -f /tmp/install_r_packages.R && rm -rf /var/lib/apt/lists/*
+RUN Rscript /tmp/install_r_packages.R && rm -f /tmp/install_r_packages.R
 
 # LANG=C.UTF−8 for R knitr
 # --------------------

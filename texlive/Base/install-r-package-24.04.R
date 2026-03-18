@@ -729,40 +729,25 @@ pkg <- sub(" .*", "", lines)
 ver <- sub(".* ", "", lines)
 
 repo <- "https://packagemanager.posit.co/cran/2024-03-15"
-
-# 一次性取出 apt 里所有 r-cran-* 包
-apt_pkgs <- system2("apt-cache", c("pkgnames", "r-cran-"), stdout = TRUE)
-
-# 哪些包能走 apt
-is_apt <- paste0("r-cran-", tolower(pkg)) %in% apt_pkgs
-
-# apt 的一次性安装
-if (any(is_apt)) {
-  cat("APT installing:\n")
-  cat(paste(pkg[is_apt], collapse = "\n"), "\n")
-  try(system2(
-    "apt",
-    c("install", "-y", "--no-install-recommends",
-      paste0("r-cran-", tolower(pkg[is_apt])))
-  ))
-}
+bioc_avail <- BiocManager::available()
+is_bioc <- pkg %in% bioc_avail
 
 # 剩下的再源码安装
-for(i in which(!is_apt)){
+for(i in seq_along(pkg)){
+  # 如果是 Bioconductor 包，跳过
+  if(is_bioc[i]) next
   cat("Installing", pkg[i], ver[i], "\n")
   try(remotes::install_version(
     pkg[i],
     version = ver[i],
     repos = repo,
     lib = "/usr/local/lib/R/site-library",
-    Ncpus = parallel::detectCores()
+    Ncpus = parallel::detectCores(),
+    upgrade = "never"
   ))
 }
 
 # 安装 BIO 系列包
-bioc_avail <- BiocManager::available()
-is_bioc <- pkg %in% bioc_avail
-
 if (any(is_bioc)) {
   options(repos = BiocManager::repositories())
   for (i in which(is_bioc)) {
