@@ -60,6 +60,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make cmake build-essential gfortran\
     gnupg ca-certificates dirmngr \
     libblas-dev liblapack-dev libcurl4-openssl-dev libssl-dev libxml2-dev zlib1g-dev libfontconfig1-dev libmagick++-dev libudunits2-dev libgdal-dev\
+    libfftw3-dev libgmp-dev libgsl0-dev libharfbuzz-dev libfribidi-dev libmpfr-dev jags\
     && rm -rf /var/lib/apt/lists/*
 
 # Install Extra fonts

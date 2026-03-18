@@ -8,7 +8,7 @@ cat("MAKEFLAGS =", Sys.getenv("MAKEFLAGS"), "\n")
 
 # 如果没有 remotes 就安装
 if (!requireNamespace("remotes", quietly = TRUE))
-  install.packages("remotes", repos="https://packagemanager.posit.co/cran/2024-03-15")
+  install.packages("remotes", repos="https://packagemanager.posit.co/cran/2024-04-01")
 
 
 # 安装 BiocManager 包
@@ -16,7 +16,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
   remotes::install_version(
     "BiocManager",
     version = "1.30.22",
-    repos = "https://packagemanager.posit.co/cran/2024-03-15",
+    repos = "https://packagemanager.posit.co/cran/2024-04-01",
     lib = "/usr/local/lib/R/site-library",
     Ncpus = parallel::detectCores(),
     upgrade = "never"
@@ -741,7 +741,7 @@ lines <- lines[nchar(lines) > 0]
 pkg <- sub(" .*", "", lines)
 ver <- sub(".* ", "", lines)
 
-repo <- "https://packagemanager.posit.co/cran/2024-03-15"
+repo <- "https://packagemanager.posit.co/cran/2024-04-01"
 bioc_avail <- BiocManager::available()
 is_bioc <- pkg %in% bioc_avail
 
