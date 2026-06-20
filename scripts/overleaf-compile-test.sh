@@ -180,12 +180,23 @@ detect_compiler_magic() {
     *pdflatex*) echo pdflatex;; *latex*) echo latex;; *) echo "";;
   esac
 }
+detect_compiler_engine_req() {
+  # 扫描整个项目（含 .cls/.sty）里强制引擎的声明 / scan the whole project (incl. .cls/.sty) for engine requirements
+  # \RequireLuaTeX / \RequireXeTeX（如 cumcmthesis.cls），以及 fontspec/xeCJK/unicode-math（需 xe/lua，不可 pdflatex）
+  if grep -rlqE '\\RequireLuaTeX' "$SRC" 2>/dev/null; then echo lualatex; return; fi
+  if grep -rlqE '\\RequireXeTeX' "$SRC" 2>/dev/null; then echo xelatex; return; fi
+  # fontspec/xeCJK/unicode-math 在 pdflatex 下会直接报错，默认按 xelatex 处理 / these error under pdflatex; default to xelatex
+  if grep -rlqE '\\(usepackage|RequirePackage)(\[[^]]*\])?\{(fontspec|xeCJK|unicode-math)\}' "$SRC" 2>/dev/null; then echo xelatex; return; fi
+  echo ""
+}
 COMPILER_SRC="用户填写 / user-provided"
 if [[ "$COMPILER" == "auto" ]]; then
   if [[ -n "$PROBED_COMPILER" ]]; then COMPILER="$PROBED_COMPILER"; COMPILER_SRC="socket 探测 / socket-probed"
   else
     M="$(detect_compiler_magic)"
+    E="$(detect_compiler_engine_req)"
     if [[ -n "$M" ]]; then COMPILER="$M"; COMPILER_SRC="魔法注释 / magic comment"
+    elif [[ -n "$E" ]]; then COMPILER="$E"; COMPILER_SRC="引擎声明探测（\\RequireXeTeX/fontspec 等）/ engine-requirement scan"
     else COMPILER="pdflatex"; COMPILER_SRC="默认 / default"; fi
   fi
 fi
@@ -269,12 +280,15 @@ PDF_OK=no; [[ -f "$OUT/output.pdf" ]] && PDF_OK=yes
 PDF_SIZE=0; [[ -f "$OUT/output.pdf" ]] && PDF_SIZE=$(stat -c%s "$OUT/output.pdf")
 
 # 若有 PDF，用镜像里的 ghostscript 渲染首页预览图（尽力而为）/ if a PDF exists, render a first-page preview via ghostscript (best-effort)
-# 需让镜像里的 tex 用户能写入挂载目录 / make the mounted dir writable by the image's tex user
+# 写到编译目录（$MAIN_DIR=/compile，tex 用户已可写，刚成功写了 output.pdf）再拷到 $OUT，
+# 避免 CI 上 runner(uid 1001) 与镜像 tex(uid 1000) 的属主不一致导致无法写入 $OUT。
+# Write into the compile dir (/compile, already writable by tex — it just wrote output.pdf), then copy to $OUT;
+# this avoids the CI uid mismatch (runner uid 1001 vs image tex uid 1000) that blocked writing into $OUT.
 if [[ "$PDF_OK" == yes ]]; then
-  chmod -R a+rwX "$OUT" 2>/dev/null || true
-  docker run --rm --user "$IMAGE_USER" --network none -v "$OUT":/d -w /d -e HOME=/tmp "$IMAGE" \
+  docker run --rm --user "$IMAGE_USER" --network none -v "$MAIN_DIR":/compile -w /compile -e HOME=/tmp "$IMAGE" \
     gs -dQUIET -dNOPAUSE -dBATCH -sDEVICE=png16m -r100 -dFirstPage=1 -dLastPage=1 \
-       -sOutputFile=/d/preview.png /d/output.pdf >/dev/null 2>&1 || true
+       -sOutputFile=/compile/preview.png /compile/output.pdf >/dev/null 2>&1 || true
+  [[ -f "$MAIN_DIR/preview.png" ]] && cp "$MAIN_DIR/preview.png" "$OUT/" 2>/dev/null || true
 fi
 
 # ---- 生成 summary.md / build summary ----
