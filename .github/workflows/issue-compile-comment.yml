@@ -63,6 +63,7 @@ jobs:
       - name: Host artifacts on a Release
         id: assets
         if: steps.ctx.outputs.skip == '0'
+        continue-on-error: true # hosting must never block the comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -70,31 +71,33 @@ jobs:
           RID: ${{ github.event.workflow_run.id }}
           BASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/compile-logs
         run: |
-          set -e
+          # 注意：GitHub 默认用 `bash -e`，用 if/fi 而非 `[ -f ] && echo`，避免末条命令非零导致整步失败
+          # Note: GitHub runs `bash -e`; use if/fi (not `[ -f ] && echo`) so a missing file can't fail the step
           TAG=compile-logs
           PREFIX="i${N}-r${RID}"
           gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1 || \
             gh release create "$TAG" --repo "$REPO" --title "Compile test logs" \
-              --notes "本 release 仅托管 issue 编译测试的日志/PDF。/ Hosts logs & PDFs from issue compile tests." \
+              --notes "Hosts logs & PDFs from issue compile tests." \
               --prerelease 2>/dev/null || true
 
-          # 把编译产物打成一个 zip（排除上下文/状态文件）/ zip the compiled outputs (excluding context/status files)
+          # zip the compiled outputs (excluding the context/status files)
           UP=()
           if [ -d art ]; then
-            ( cd art && zip -q -r "../${PREFIX}-outputs.zip" . -x ctx.env result.env ) && UP+=("${PREFIX}-outputs.zip") || true
-            [ -f art/output.log ]  && cp art/output.log  "${PREFIX}-output.log"  && UP+=("${PREFIX}-output.log")
-            [ -f art/output.pdf ]  && cp art/output.pdf  "${PREFIX}-output.pdf"  && UP+=("${PREFIX}-output.pdf")
-            [ -f art/preview.png ] && cp art/preview.png "${PREFIX}-preview.png" && UP+=("${PREFIX}-preview.png")
+            if ( cd art && zip -q -r "../${PREFIX}-outputs.zip" . -x './ctx.env' './result.env' ); then UP+=("${PREFIX}-outputs.zip"); fi
+            if [ -f art/output.log ];  then cp art/output.log  "${PREFIX}-output.log";  UP+=("${PREFIX}-output.log");  fi
+            if [ -f art/output.pdf ];  then cp art/output.pdf  "${PREFIX}-output.pdf";  UP+=("${PREFIX}-output.pdf");  fi
+            if [ -f art/preview.png ]; then cp art/preview.png "${PREFIX}-preview.png"; UP+=("${PREFIX}-preview.png"); fi
           fi
           if [ ${#UP[@]} -gt 0 ]; then
             gh release upload "$TAG" "${UP[@]}" --repo "$REPO" --clobber || true
           fi
           {
-            [ -f "${PREFIX}-outputs.zip" ] && echo "zip_url=${BASE_URL}/${PREFIX}-outputs.zip"
-            [ -f "${PREFIX}-output.log" ] && echo "log_url=${BASE_URL}/${PREFIX}-output.log"
-            [ -f "${PREFIX}-output.pdf" ] && echo "pdf_url=${BASE_URL}/${PREFIX}-output.pdf"
-            [ -f "${PREFIX}-preview.png" ] && echo "preview_url=${BASE_URL}/${PREFIX}-preview.png"
+            if [ -f "${PREFIX}-outputs.zip" ]; then echo "zip_url=${BASE_URL}/${PREFIX}-outputs.zip"; fi
+            if [ -f "${PREFIX}-output.log" ]; then echo "log_url=${BASE_URL}/${PREFIX}-output.log"; fi
+            if [ -f "${PREFIX}-output.pdf" ]; then echo "pdf_url=${BASE_URL}/${PREFIX}-output.pdf"; fi
+            if [ -f "${PREFIX}-preview.png" ]; then echo "preview_url=${BASE_URL}/${PREFIX}-preview.png"; fi
           } >> "$GITHUB_OUTPUT"
+          :
 
       - name: Comment results back to the issue
         if: steps.ctx.outputs.skip == '0'
@@ -121,8 +124,8 @@ jobs:
             else
               echo "**📎 下载 / Downloads**"
               echo
-              [ -n "$ZIP_URL" ] && echo "- 🗂️ 全部编译产物(zip) / all compiled outputs: [\`outputs.zip\`]($ZIP_URL)"
-              [ -n "$LOG_URL" ] && echo "- 📄 编译日志 / compile log: [\`output.log\`]($LOG_URL)"
+              if [ -n "$ZIP_URL" ]; then echo "- 🗂️ 全部编译产物(zip) / all compiled outputs: [\`outputs.zip\`]($ZIP_URL)"; fi
+              if [ -n "$LOG_URL" ]; then echo "- 📄 编译日志 / compile log: [\`output.log\`]($LOG_URL)"; fi
               if [ -n "$PDF_URL" ]; then
                 echo "- 📕 生成的 PDF / compiled PDF: [\`output.pdf\`]($PDF_URL)"
               else
