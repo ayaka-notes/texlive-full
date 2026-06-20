@@ -23,7 +23,9 @@ permissions:
 jobs:
   comment:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion != 'cancelled'
+    # 仅当工作流 A 真正跑完（非 skipped/cancelled/failure）才评论，避免对被跳过的 run 产生空操作
+    # Only comment when workflow A actually succeeded (not skipped/cancelled/failed), to avoid no-op runs
+    if: github.event.workflow_run.conclusion == 'success'
     steps:
       - name: 下载工作流 A 的产物 / download workflow A's artifact
         uses: actions/download-artifact@v4
