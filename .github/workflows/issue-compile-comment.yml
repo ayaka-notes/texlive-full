@@ -27,7 +27,7 @@ jobs:
     # Only comment when workflow A actually succeeded (not skipped/cancelled/failed), to avoid no-op runs
     if: github.event.workflow_run.conclusion == 'success'
     steps:
-      - name: 下载工作流 A 的产物 / download workflow A's artifact
+      - name: Download workflow A artifact
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
@@ -37,7 +37,7 @@ jobs:
           merge-multiple: true
           path: art
 
-      - name: 解析上下文（安全方式，绝不 source）/ parse context (safely, never source)
+      - name: Parse context (safe, never source)
         id: ctx
         run: |
           set -e
@@ -60,7 +60,7 @@ jobs:
             echo "link_present=$LP"
           } >> "$GITHUB_OUTPUT"
 
-      - name: 托管产物到 Release / host artifacts on a Release
+      - name: Host artifacts on a Release
         id: assets
         if: steps.ctx.outputs.skip == '0'
         env:
@@ -96,7 +96,7 @@ jobs:
             [ -f "${PREFIX}-preview.png" ] && echo "preview_url=${BASE_URL}/${PREFIX}-preview.png"
           } >> "$GITHUB_OUTPUT"
 
-      - name: 回贴结果到 issue / comment results back
+      - name: Comment results back to the issue
         if: steps.ctx.outputs.skip == '0'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -145,7 +145,7 @@ jobs:
           } > comment.md
           gh issue comment "$N" --repo "$REPO" --body-file comment.md
 
-      - name: 打结果标签 / label the result
+      - name: Label the result
         if: steps.ctx.outputs.skip == '0'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

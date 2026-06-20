@@ -64,7 +64,7 @@ jobs:
 
       # TeXLive full 镜像很大（约 30GB），把 docker data-root 迁到更大的 /mnt
       # The TeXLive full image is huge (~30GB); move docker's data-root to the larger /mnt
-      - name: 给 Docker 腾空间 / give Docker more disk
+      - name: Free up disk for Docker
         run: |
           echo "=== before ==="; df -h / /mnt || true
           sudo systemctl stop docker docker.socket 2>/dev/null || true
@@ -79,7 +79,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: 解析输入 / resolve inputs
+      - name: Resolve inputs
         id: inp
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -103,7 +103,7 @@ jobs:
           fi
 
       # 把上下文写给工作流 B（都是可信的 GitHub 内置值）/ write context for workflow B (all trusted GitHub values)
-      - name: 记录上下文 / record context
+      - name: Record context for workflow B
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           EVENT_NAME: ${{ github.event_name }}
@@ -116,7 +116,7 @@ jobs:
             echo "link_present=${LINK_PRESENT}"
           } > compile-result/ctx.env
 
-      - name: 编译复现 / reproduce the compile
+      - name: Reproduce the compile
         if: steps.inp.outputs.link != ''
         continue-on-error: true
         env:
@@ -136,7 +136,7 @@ jobs:
             --out compile-result \
             --timeout 600
 
-      - name: 上传结果 artifact（供工作流 B 评论使用）/ upload results for workflow B
+      - name: Upload results for workflow B
         if: always()
         uses: actions/upload-artifact@v4
         with:
