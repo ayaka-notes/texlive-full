@@ -46,8 +46,13 @@ concurrency:
 
 jobs:
   compile-test:
-    # 用“标签 或 标题前缀”双判定：即便标签缺失（如标签未创建）也能触发
-    # Gate on label OR title prefix, so it still fires even if the label is missing (e.g. not yet created)
+    # 触发规则 / trigger rules:
+    #  - 新建 issue：标签 或 标题前缀匹配即可（任何人都能上报 bug）
+    #    new issue: label OR title prefix matches (anyone may report a bug)
+    #  - /retest-compile 评论：还要求评论者是 issue 作者，或 owner/member/collaborator
+    #    /retest-compile comment: also requires the commenter to be the issue author, or owner/member/collaborator
+    #    （防止任何人靠刷评论白嫖 CI 分钟数；未授权者会被静默跳过）
+    #    (prevents anyone from burning CI minutes via comments; unauthorized commenters are silently skipped)
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issues' &&
@@ -56,7 +61,11 @@ jobs:
       (github.event_name == 'issue_comment' &&
         startsWith(github.event.comment.body, '/retest-compile') &&
         (contains(github.event.issue.labels.*.name, 'texlive-image-bug') ||
-         startsWith(github.event.issue.title, '[TeXLive Image Bug]')))
+         startsWith(github.event.issue.title, '[TeXLive Image Bug]')) &&
+        (github.event.comment.author_association == 'OWNER' ||
+         github.event.comment.author_association == 'MEMBER' ||
+         github.event.comment.author_association == 'COLLABORATOR' ||
+         github.event.comment.user.login == github.event.issue.user.login))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
