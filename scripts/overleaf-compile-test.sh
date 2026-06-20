@@ -269,8 +269,10 @@ PDF_OK=no; [[ -f "$OUT/output.pdf" ]] && PDF_OK=yes
 PDF_SIZE=0; [[ -f "$OUT/output.pdf" ]] && PDF_SIZE=$(stat -c%s "$OUT/output.pdf")
 
 # 若有 PDF，用镜像里的 ghostscript 渲染首页预览图（尽力而为）/ if a PDF exists, render a first-page preview via ghostscript (best-effort)
+# 需让镜像里的 tex 用户能写入挂载目录 / make the mounted dir writable by the image's tex user
 if [[ "$PDF_OK" == yes ]]; then
-  docker run --rm --user "$IMAGE_USER" -v "$OUT":/d -w /d -e HOME=/tmp "$IMAGE" \
+  chmod -R a+rwX "$OUT" 2>/dev/null || true
+  docker run --rm --user "$IMAGE_USER" --network none -v "$OUT":/d -w /d -e HOME=/tmp "$IMAGE" \
     gs -dQUIET -dNOPAUSE -dBATCH -sDEVICE=png16m -r100 -dFirstPage=1 -dLastPage=1 \
        -sOutputFile=/d/preview.png /d/output.pdf >/dev/null 2>&1 || true
 fi
