@@ -1,0 +1,142 @@
+name: Issue Compile Test
+
+# ┌─ 安全模型 / Security model ───────────────────────────────────────────────┐
+# │ 本工作流会下载并编译“不可信”的用户项目（issue 里的 Overleaf 链接）。       │
+# │ This workflow downloads & compiles an UNTRUSTED user project.             │
+# │ 因此它：                                                                   │
+# │   • 只读权限、没有任何写权限 / read-only, no write permissions             │
+# │   • 不引用任何敏感 secret（仅隐式 GITHUB_TOKEN，且为只读）                  │
+# │     references NO sensitive secrets (only the implicit, read-only token)  │
+# │   • 不评论、不发 release —— 这些交给单独的特权工作流 B 处理                  │
+# │     never comments / writes —— that is done by the separate workflow B    │
+# │ 结果通过 artifact 传给 “Issue Compile Comment” 工作流。                     │
+# │ Results are handed to the "Issue Compile Comment" workflow via artifact.  │
+# └───────────────────────────────────────────────────────────────────────────┘
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      share_link:
+        description: Overleaf 只读分享链接 / Overleaf read-only share link
+        required: true
+      compiler:
+        description: auto | pdflatex | xelatex | lualatex | latex
+        required: false
+        default: auto
+      texlive:
+        description: auto | 2026 | 2025 | 2024 | 2023 | 2022 | 2021 | 2020
+        required: false
+        default: auto
+      main_file:
+        description: 主文件相对路径（可留空）/ main file relative path (optional)
+        required: false
+        default: ""
+
+# 最小权限：只读。无 issues:write，无 contents:write。
+# Least privilege: read-only. No issues:write, no contents:write.
+permissions:
+  contents: read
+
+concurrency:
+  group: issue-compile-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  compile-test:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' &&
+        contains(github.event.issue.labels.*.name, 'texlive-image-bug')) ||
+      (github.event_name == 'issue_comment' &&
+        contains(github.event.issue.labels.*.name, 'texlive-image-bug') &&
+        startsWith(github.event.comment.body, '/retest-compile'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # TeXLive full 镜像很大（约 30GB），把 docker data-root 迁到更大的 /mnt
+      # The TeXLive full image is huge (~30GB); move docker's data-root to the larger /mnt
+      - name: 给 Docker 腾空间 / give Docker more disk
+        run: |
+          echo "=== before ==="; df -h / /mnt || true
+          sudo systemctl stop docker docker.socket 2>/dev/null || true
+          sudo mkdir -p /mnt/docker
+          echo '{ "data-root": "/mnt/docker" }' | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker
+          sudo docker info 2>/dev/null | grep -i "docker root" || true
+          echo "=== after ==="; df -h / /mnt || true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 解析输入 / resolve inputs
+        id: inp
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          IN_LINK: ${{ inputs.share_link }}
+          IN_COMPILER: ${{ inputs.compiler }}
+          IN_TEXLIVE: ${{ inputs.texlive }}
+          IN_MAIN: ${{ inputs.main_file }}
+        run: |
+          set -e
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            {
+              echo "link=$IN_LINK"
+              echo "compiler=${IN_COMPILER:-auto}"
+              echo "texlive=${IN_TEXLIVE:-auto}"
+              echo "main=$IN_MAIN"
+            } >> "$GITHUB_OUTPUT"
+          else
+            # ISSUE_BODY 仅经环境变量传入，绝不内联到 shell / passed via env only, never inlined into shell
+            node scripts/parse-issue-form.mjs >> "$GITHUB_OUTPUT"
+          fi
+
+      # 把上下文写给工作流 B（都是可信的 GitHub 内置值）/ write context for workflow B (all trusted GitHub values)
+      - name: 记录上下文 / record context
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          EVENT_NAME: ${{ github.event_name }}
+          LINK_PRESENT: ${{ steps.inp.outputs.link != '' }}
+        run: |
+          mkdir -p compile-result
+          {
+            echo "issue_number=${ISSUE_NUMBER}"
+            echo "event_name=${EVENT_NAME}"
+            echo "link_present=${LINK_PRESENT}"
+          } > compile-result/ctx.env
+
+      - name: 编译复现 / reproduce the compile
+        if: steps.inp.outputs.link != ''
+        continue-on-error: true
+        env:
+          # 全部经环境变量传入，issue 内容无法被当作 shell 执行；本步骤没有任何 token
+          # everything via env so issue content can't be executed as shell; this step holds NO token
+          LINK: ${{ steps.inp.outputs.link }}
+          COMPILER: ${{ steps.inp.outputs.compiler }}
+          TEXLIVE: ${{ steps.inp.outputs.texlive }}
+          MAIN: ${{ steps.inp.outputs.main }}
+        run: |
+          chmod +x scripts/overleaf-compile-test.sh
+          ./scripts/overleaf-compile-test.sh \
+            --link "$LINK" \
+            --compiler "$COMPILER" \
+            --texlive "$TEXLIVE" \
+            --main "$MAIN" \
+            --out compile-result \
+            --timeout 600
+
+      - name: 上传结果 artifact（供工作流 B 评论使用）/ upload results for workflow B
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-result-${{ github.event.issue.number || github.run_id }}
+          path: compile-result
+          if-no-files-found: warn
+          retention-days: 30

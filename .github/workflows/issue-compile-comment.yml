@@ -1,0 +1,161 @@
+name: Issue Compile Comment
+
+# ┌─ 安全模型 / Security model ───────────────────────────────────────────────┐
+# │ 本工作流拥有写权限（评论 issue、发 release 资产），但它【从不执行】用户     │
+# │ 项目内容 —— 不可信的编译早已在工作流 A 的无 token 沙箱里跑完。             │
+# │ This privileged workflow has write access but NEVER executes user content │
+# │ —— the untrusted compile already ran in workflow A's token-less sandbox.  │
+# │ 这里只读取 A 产出的文件（pdf/log/summary）并贴回 issue。                    │
+# │ It only reads files produced by A (pdf/log/summary) and posts them back.  │
+# │ 所有来自产物的值都经校验，绝不 `source`、绝不内联进 shell。                 │
+# │ All values from the artifact are validated; never `source`d or inlined.   │
+# └───────────────────────────────────────────────────────────────────────────┘
+on:
+  workflow_run:
+    workflows: ["Issue Compile Test"]
+    types: [completed]
+
+permissions:
+  issues: write
+  contents: write # 写 release 资产以托管 pdf/zip / write release assets to host pdf/zip
+  actions: read # 下载来自工作流 A 的 artifact / download workflow A's artifact
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'cancelled'
+    steps:
+      - name: 下载工作流 A 的产物 / download workflow A's artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: compile-result-*
+          merge-multiple: true
+          path: art
+
+      - name: 解析上下文（安全方式，绝不 source）/ parse context (safely, never source)
+        id: ctx
+        run: |
+          set -e
+          if [ ! -f art/ctx.env ]; then
+            echo "没有上下文，跳过 / no context, skipping"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # 仅用 grep 取值，绝不 source 不可信文件 / read with grep only, never source untrusted files
+          getv() { grep -E "^$1=" art/ctx.env | head -1 | cut -d= -f2-; }
+          N="$(getv issue_number)"; EV="$(getv event_name)"; LP="$(getv link_present)"
+          # issue 号必须是纯数字 / issue number must be purely numeric
+          if ! printf '%s' "$N" | grep -qE '^[0-9]+$'; then
+            echo "无有效 issue 号，跳过 / no valid issue number, skipping"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$EV" = "workflow_dispatch" ]; then
+            echo "手动触发，无 issue 可评论 / manual dispatch, nothing to comment"; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          {
+            echo "skip=0"
+            echo "issue=$N"
+            echo "link_present=$LP"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 托管产物到 Release / host artifacts on a Release
+        id: assets
+        if: steps.ctx.outputs.skip == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          N: ${{ steps.ctx.outputs.issue }}
+          RID: ${{ github.event.workflow_run.id }}
+          BASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/compile-logs
+        run: |
+          set -e
+          TAG=compile-logs
+          PREFIX="i${N}-r${RID}"
+          gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1 || \
+            gh release create "$TAG" --repo "$REPO" --title "Compile test logs" \
+              --notes "本 release 仅托管 issue 编译测试的日志/PDF。/ Hosts logs & PDFs from issue compile tests." \
+              --prerelease 2>/dev/null || true
+
+          # 把编译产物打成一个 zip（排除上下文/状态文件）/ zip the compiled outputs (excluding context/status files)
+          UP=()
+          if [ -d art ]; then
+            ( cd art && zip -q -r "../${PREFIX}-outputs.zip" . -x ctx.env result.env ) && UP+=("${PREFIX}-outputs.zip") || true
+            [ -f art/output.log ]  && cp art/output.log  "${PREFIX}-output.log"  && UP+=("${PREFIX}-output.log")
+            [ -f art/output.pdf ]  && cp art/output.pdf  "${PREFIX}-output.pdf"  && UP+=("${PREFIX}-output.pdf")
+            [ -f art/preview.png ] && cp art/preview.png "${PREFIX}-preview.png" && UP+=("${PREFIX}-preview.png")
+          fi
+          if [ ${#UP[@]} -gt 0 ]; then
+            gh release upload "$TAG" "${UP[@]}" --repo "$REPO" --clobber || true
+          fi
+          {
+            [ -f "${PREFIX}-outputs.zip" ] && echo "zip_url=${BASE_URL}/${PREFIX}-outputs.zip"
+            [ -f "${PREFIX}-output.log" ] && echo "log_url=${BASE_URL}/${PREFIX}-output.log"
+            [ -f "${PREFIX}-output.pdf" ] && echo "pdf_url=${BASE_URL}/${PREFIX}-output.pdf"
+            [ -f "${PREFIX}-preview.png" ] && echo "preview_url=${BASE_URL}/${PREFIX}-preview.png"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 回贴结果到 issue / comment results back
+        if: steps.ctx.outputs.skip == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          N: ${{ steps.ctx.outputs.issue }}
+          LP: ${{ steps.ctx.outputs.link_present }}
+          RID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          ZIP_URL: ${{ steps.assets.outputs.zip_url }}
+          LOG_URL: ${{ steps.assets.outputs.log_url }}
+          PDF_URL: ${{ steps.assets.outputs.pdf_url }}
+          PREVIEW_URL: ${{ steps.assets.outputs.preview_url }}
+        run: |
+          {
+            echo "> 🤖 自动编译复现 / automated compile reproduction"
+            echo ">"
+            echo "> **Workflow run ID:** \`${RID}\` · [运行详情 / run details]($RUN_URL)"
+            echo
+            if [ "$LP" != "true" ]; then
+              echo "⚠️ 未能从表单读到合法的 Overleaf 只读分享链接。请编辑 issue 补全后评论 \`/retest-compile\` 重试。"
+              echo "⚠️ No valid Overleaf read-only share link was found in the form. Please edit the issue, then comment \`/retest-compile\` to retry."
+            else
+              echo "**📎 下载 / Downloads**"
+              echo
+              [ -n "$ZIP_URL" ] && echo "- 🗂️ 全部编译产物(zip) / all compiled outputs: [\`outputs.zip\`]($ZIP_URL)"
+              [ -n "$LOG_URL" ] && echo "- 📄 编译日志 / compile log: [\`output.log\`]($LOG_URL)"
+              if [ -n "$PDF_URL" ]; then
+                echo "- 📕 生成的 PDF / compiled PDF: [\`output.pdf\`]($PDF_URL)"
+              else
+                echo "- 📕 生成的 PDF / compiled PDF: ❌ 未生成 / not produced"
+              fi
+              echo
+              if [ -n "$PREVIEW_URL" ]; then
+                echo "**🖼️ PDF 首页预览 / first-page preview**"
+                echo
+                echo "![PDF preview]($PREVIEW_URL)"
+                echo
+              fi
+              if [ -f art/summary.md ]; then
+                cat art/summary.md
+              fi
+            fi
+            echo
+            echo "---"
+            echo "<sub>修好后想重测：编辑 issue 修正信息，然后评论 \`/retest-compile\`。 / To re-test: edit the issue, then comment \`/retest-compile\`.</sub>"
+          } > comment.md
+          gh issue comment "$N" --repo "$REPO" --body-file comment.md
+
+      - name: 打结果标签 / label the result
+        if: steps.ctx.outputs.skip == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          N: ${{ steps.ctx.outputs.issue }}
+        run: |
+          gh label create compile-failed --repo "$REPO" --color D73A4A --description "本镜像复现编译失败 / image failed to compile" 2>/dev/null || true
+          gh label create compile-passed --repo "$REPO" --color 0E8A16 --description "本镜像可成功编译 / image compiled successfully" 2>/dev/null || true
+          # 安全读取 pdf 状态：仅 grep，绝不 source / read pdf status safely: grep only, never source
+          PDF="$(grep -E '^pdf=' art/result.env 2>/dev/null | head -1 | cut -d= -f2-)"
+          if [ "$PDF" = "yes" ]; then
+            gh issue edit "$N" --repo "$REPO" --add-label compile-passed --remove-label compile-failed 2>/dev/null || true
+          else
+            gh issue edit "$N" --repo "$REPO" --add-label compile-failed --remove-label compile-passed 2>/dev/null || true
+          fi

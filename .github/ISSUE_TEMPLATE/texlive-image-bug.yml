@@ -1,0 +1,104 @@
+name: 🐛 TeXLive 镜像编译 Bug / TeXLive Image Bug
+description: 官方 Overleaf 能编译，但本镜像 (ayaka-notes) 编译不了 / Compiles on official Overleaf, but fails with the ayaka-notes image
+title: "[TeXLive Image Bug]: "
+labels: ["texlive-image-bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！本模板用于：**在官方 Overleaf 上能正常编译，但用我们的 TeXLive 镜像 (ayaka-notes) 却编译失败**的问题。
+        Thanks for reporting! Use this template when a project **compiles on official Overleaf but fails with our TeXLive image (ayaka-notes)**.
+
+        提交后，机器人会用你提供的 **只读分享链接** 自动下载项目，并在对应镜像里用 `latexmk` 复现编译，然后把日志贴回本 issue。
+        After you submit, a bot downloads the project from your **read-only share link**, reproduces the compile with `latexmk` in the matching image, and posts the logs back here.
+
+        > ⚠️ 链接里的内容会被公开下载与编译，请勿包含隐私/未发表内容。
+        > ⚠️ The linked content will be downloaded and compiled publicly — do not include private/unpublished material.
+
+  - type: input
+    id: share_link
+    attributes:
+      label: Overleaf 只读分享链接 / Overleaf read-only share link
+      description: |
+        在 Overleaf 里：菜单 Menu → Share → 打开 “Anyone with this link can view” → 复制 **View only** 链接（形如 `/read/xxxx#yyyy`）。
+        In Overleaf: Menu → Share → turn on "Anyone with this link can view" → copy the **View only** link (looks like `/read/xxxx#yyyy`).
+      placeholder: https://www.overleaf.com/read/xxxxxxxxxxxx#yyyyyy
+    validations:
+      required: true
+
+  - type: dropdown
+    id: compiler
+    attributes:
+      label: 编译器 / Compiler
+      description: |
+        在 Overleaf 左下角 Menu → Settings → Compiler 查看；不确定就选自动检测。
+        Check it in Overleaf: Menu → Settings → Compiler. If unsure, pick auto-detect.
+      options:
+        - "自动检测 / Auto-detect"
+        - "pdflatex"
+        - "xelatex"
+        - "lualatex"
+        - "latex (DVI/PDF)"
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: texlive_version
+    attributes:
+      label: TeX Live 版本 / TeX Live version
+      description: |
+        在 Overleaf Menu → Settings → TeX Live version 查看；不确定就选自动（用最新）。
+        Check it in Overleaf: Menu → Settings → TeX Live version. If unsure, pick auto (latest).
+      options:
+        - "自动 / Auto (latest)"
+        - "2026"
+        - "2025"
+        - "2024"
+        - "2023"
+        - "2022"
+        - "2021"
+        - "2020"
+      default: 0
+    validations:
+      required: true
+
+  - type: input
+    id: main_file
+    attributes:
+      label: 主文件路径（可选）/ Main file path (optional)
+      description: |
+        主 .tex 文件相对路径；留空则自动检测（找含 \documentclass 与 \begin{document} 的文件）。
+        Relative path to the main .tex; leave empty to auto-detect (the file with \documentclass and \begin{document}).
+      placeholder: main.tex
+
+  - type: textarea
+    id: overleaf_evidence
+    attributes:
+      label: Overleaf 能编译的证据 + 本镜像的报错 / Proof it compiles on Overleaf + the error here
+      description: |
+        例如 Overleaf 编译成功的截图，以及你在本镜像/自建 Overleaf 上看到的报错信息。
+        e.g. a screenshot of a successful Overleaf compile, plus the error you see with this image / your self-hosted Overleaf.
+      placeholder: |
+        Overleaf：编译成功（截图） / compiles fine (screenshot)
+        本镜像 / this image: ! LaTeX Error: File `xxx.sty' not found ...
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 其他补充（可选）/ Additional context (optional)
+      description: |
+        用到的特殊宏包/字体、自建 Overleaf 版本、镜像 tag 等。
+        Special packages/fonts used, self-hosted Overleaf version, image tag, etc.
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认 / Confirmation
+      options:
+        - label: "该链接是只读分享链接，且任何人可访问 / The link is a read-only share link accessible to anyone"
+          required: true
+        - label: "该项目在官方 Overleaf 上能成功编译 / The project compiles successfully on official Overleaf"
+          required: true
+        - label: "我已确认链接内容可公开 / I confirm the linked content may be public"
+          required: true
