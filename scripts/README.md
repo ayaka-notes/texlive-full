@@ -12,15 +12,15 @@ Reproduces **"compiles on official Overleaf, but fails with the ayaka-notes/texl
    - 安全：只允许 `https://*.overleaf.com`（防 SSRF）。
      Security: only `https://*.overleaf.com` is allowed (anti-SSRF).
 2. `overleaf-compile-test.sh` —— 解压、确定编译器/TeXLive 年份/主文件，在镜像里用 `latexmk` 编译，收集日志。
-   Unpacks, resolves compiler / TeX Live year / main file, runs `latexmk` in the image, collects logs.
+   Unpacks, uses the user-selected compiler / TeX Live year (no auto-detection), locates the main file, runs `latexmk` in the image, collects logs.
 
 ## 用法 / Usage
 
 ```bash
 scripts/overleaf-compile-test.sh \
   --link  "https://www.overleaf.com/read/xxxxxxxxxxxx#yyyyyy" \
-  --compiler auto|pdflatex|xelatex|lualatex|latex \
-  --texlive  auto|2026|2025|2024|2023|2022|2021|2020 \
+  --compiler pdflatex|xelatex|lualatex|latex \
+  --texlive  2026|2025|2024|2023|2022|2021|2020 \
   --main     path/to/main.tex \      # 可选 / optional
   --out      ./compile-result
 ```
@@ -55,6 +55,6 @@ The compile command, environment and sandbox match Overleaf CLSI (`services/clsi
 
 - 仅支持 `/read/` 只读匿名链接；读写匿名链接 overleaf.com 默认禁止。
   Only anonymous `/read/` links; anonymous read-write links are disabled by overleaf.com.
-- 编译器/年份优先用用户填写；socket 自动探测在 overleaf.com 上不稳定，默认禁用（缺 `ws` 时自动跳过）。
-  Compiler/year come from the user's input first; socket auto-probe is unreliable on overleaf.com and off by default (skipped when `ws` is absent).
+- 编译器与 TeXLive 年份**严格按用户在表单里的选择**，不做任何自动探测/抓取（请按 Overleaf 的 Settings 填一致）。
+  Compiler and TeX Live year are taken **strictly from the user's form selection** — no auto-detection/fetch (set them to match your Overleaf Settings).
 - 不处理 `.Rtex/.Rmd/.md` 的预处理（Overleaf 会先转 `.tex`）。/ no `.Rtex/.Rmd/.md` pre-processing (Overleaf converts to `.tex` first).

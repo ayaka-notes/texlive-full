@@ -34,15 +34,13 @@ body:
     attributes:
       label: Compiler / 编译器
       description: |
-        Find it in Overleaf at `Menu → Settings → Compiler`. This must match what you use on Overleaf, otherwise the result is not comparable. If unsure, pick auto-detect.
-        在 Overleaf 的 `菜单 Menu → Settings → Compiler` 查看。务必与你在 Overleaf 上用的一致，否则结果不可比；不确定就选自动检测。
+        Pick the **exact same** compiler you use on Overleaf — `Menu → Settings → Compiler`. We do **not** auto-detect; we use exactly what you select here.
+        请选择与你在 Overleaf 上**完全相同**的编译器——`菜单 Menu → Settings → Compiler`。我们**不做自动检测**，严格按你这里的选择编译。
       options:
-        - "Auto-detect / 自动检测"
         - "pdflatex"
         - "xelatex"
         - "lualatex"
         - "latex (DVI/PDF)"
-      default: 0
     validations:
       required: true
 
@@ -51,10 +49,9 @@ body:
     attributes:
       label: TeX Live version / TeX Live 版本
       description: |
-        Find it in Overleaf at `Menu → Settings → TeX Live version`. Picking the same year reproduces the exact toolchain. If unsure, pick auto (uses the latest).
-        在 Overleaf 的 `菜单 Menu → Settings → TeX Live version` 查看。选同一年份可复现完全相同的工具链；不确定就选自动（用最新）。
+        Pick the **exact same** year you use on Overleaf — `Menu → Settings → TeX Live version`. We use exactly what you select (no auto).
+        请选择与你在 Overleaf 上**完全相同**的年份——`菜单 Menu → Settings → TeX Live version`。我们严格按你的选择（不自动）。
       options:
-        - "Auto (latest) / 自动（用最新）"
         - "2026"
         - "2025"
         - "2024"
@@ -62,7 +59,6 @@ body:
         - "2022"
         - "2021"
         - "2020"
-      default: 0
     validations:
       required: true
 

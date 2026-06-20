@@ -13,8 +13,8 @@
 # 用法 / Usage:
 #   scripts/overleaf-compile-test.sh \
 #       --link  "https://www.overleaf.com/read/xxxx#yyyy" \
-#       [--compiler auto|pdflatex|xelatex|lualatex|latex] \
-#       [--texlive auto|2026|2025|2024|2023|2022|2021|2020] \
+#       --compiler pdflatex|xelatex|lualatex|latex \   # 必填，无 auto / required, no auto
+#       --texlive  2026|2025|2024|2023|2022|2021|2020 \ # 必填，无 auto / required, no auto
 #       [--main   path/to/main.tex] \
 #       [--registry ghcr.io/ayaka-notes/texlive-full] \
 #       [--timeout 600] \
@@ -24,11 +24,10 @@ set -uo pipefail
 
 # ---- 默认值 / defaults ----
 LINK=""
-COMPILER="auto"
-TEXLIVE="auto"
+COMPILER=""                  # 必填，由用户/表单提供，无自动探测 / required from user/form, no auto-detection
+TEXLIVE=""                   # 必填 / required
 MAIN=""
 REGISTRY="ghcr.io/ayaka-notes/texlive-full"
-LATEST_YEAR="2025"            # --texlive auto 且无法探测时的兜底 / fallback when auto & undetectable
 TIMEOUT="600"
 OUT="./compile-result"
 IMAGE_USER="tex"             # 与 Overleaf 默认编译镜像一致 / matches Overleaf's default compile image user
@@ -87,11 +86,14 @@ fail_input() {
 if ! [[ "$LINK" =~ ^https://([a-z0-9-]+\.)*overleaf\.com/(read/[A-Za-z0-9]+|[A-Za-z0-9]+)(#[A-Za-z0-9]+)?$ ]]; then
   fail_input "Overleaf 链接格式不合法或主机不是 overleaf.com / link is malformed or host is not overleaf.com: \`${LINK}\`"
 fi
-# 编译器白名单 / compiler allowlist
-case "$COMPILER" in auto|pdflatex|xelatex|lualatex|latex) ;; *) fail_input "未知编译器 / unknown compiler: \`${COMPILER}\`";; esac
-# TeXLive 年份白名单 / TeX Live year allowlist
-if ! [[ "$TEXLIVE" =~ ^(auto|202[0-6])$ ]]; then
-  fail_input "TeXLive 版本不合法（仅 2020–2026 或 auto）/ invalid TeX Live version (only 2020–2026 or auto): \`${TEXLIVE}\`"
+# 编译器白名单（必须明确选择，不接受 auto/自动探测）/ compiler allowlist (must be explicit; no auto-detection)
+case "$COMPILER" in
+  pdflatex|xelatex|lualatex|latex) ;;
+  *) fail_input "请在表单里明确选择编译器（pdflatex/xelatex/lualatex/latex），不支持 auto / select a specific compiler; 'auto' is not supported: \`${COMPILER}\`";;
+esac
+# TeXLive 年份白名单（必须明确选择，不接受 auto）/ year allowlist (must be explicit; no auto)
+if ! [[ "$TEXLIVE" =~ ^202[0-6]$ ]]; then
+  fail_input "请在表单里明确选择 TeX Live 年份（2020–2026），不支持 auto / select a specific TeX Live year (2020–2026); 'auto' is not supported: \`${TEXLIVE}\`"
 fi
 # 主文件：可空；若给定必须是安全的相对 .tex 路径，禁止 .. 与绝对路径
 # main file: optional; if given, must be a safe relative .tex path, no .. and no absolute path
@@ -117,13 +119,10 @@ if ! node "$SCRIPT_DIR/overleaf-fetch.mjs" --link "$LINK" --zip "$WORK/project.z
   exit 7
 fi
 
-# 读取元数据（socket 探测到的值，可能为空）/ read metadata (socket-probed values, may be empty)
+# 读取元数据（仅 projectId，不做任何编译器/年份的自动探测）/ read metadata (only projectId; no auto-detection of compiler/year)
 META="$WORK/meta.json"
 get_meta() { node -e "const m=require('$META');process.stdout.write(String(m['$1']??''))" 2>/dev/null; }
-PROBED_COMPILER="$(get_meta compiler)"
-PROBED_YEAR="$(get_meta texliveYear)"
-PROBED_MAIN="$(get_meta rootDocPath)"
-PROJECT_NAME="$(get_meta name)"
+PROJECT_NAME="$(get_meta projectId)"
 
 say "==> 2/5 解压项目 / unpacking project"
 SRC="$WORK/src"
@@ -131,11 +130,11 @@ mkdir -p "$SRC"
 unzip -q -o "$WORK/project.zip" -d "$SRC" || { note "❌ 解压失败 / unzip failed"; exit 8; }
 
 # ---- 解析主文件 / resolve main file ----
-# 优先级 / precedence: 用户指定 > socket 探测 > 自动检测(含 \documentclass 与 \begin{document})
+# 优先级 / precedence: 用户指定 > 自动检测(含 \documentclass 与 \begin{document})
+# 说明：主文件只是“定位根 .tex 文件”，与编译器/年份无关；用户留空时才按文件内容定位。
+# Note: this only LOCATES the root .tex file; it is unrelated to compiler/year. Used only when the user leaves it blank.
 if [[ -n "$MAIN" ]]; then
   MAIN_REL="$MAIN"
-elif [[ -n "$PROBED_MAIN" ]]; then
-  MAIN_REL="$PROBED_MAIN"
 else
   MAIN_REL=""
 fi
@@ -169,38 +168,9 @@ fi
 MAIN_DIR="$(dirname "$SRC/$MAIN_REL")"
 MAIN_BASE="$(basename "$MAIN_REL")"
 
-# ---- 解析编译器 / resolve compiler ----
-# 优先级 / precedence: 用户指定 > socket 探测 > 魔法注释 > pdflatex
-detect_compiler_magic() {
-  # % !TeX program = xelatex  /  % !TEX TS-program = lualatex
-  local line
-  line="$(grep -iEm1 '%\s*!\s*(tex\s+program|tex\s+ts-program|program)\s*=' "$SRC/$MAIN_REL" 2>/dev/null)"
-  case "${line,,}" in
-    *xelatex*) echo xelatex;; *lualatex*) echo lualatex;;
-    *pdflatex*) echo pdflatex;; *latex*) echo latex;; *) echo "";;
-  esac
-}
-detect_compiler_engine_req() {
-  # 扫描整个项目（含 .cls/.sty）里强制引擎的声明 / scan the whole project (incl. .cls/.sty) for engine requirements
-  # \RequireLuaTeX / \RequireXeTeX（如 cumcmthesis.cls），以及 fontspec/xeCJK/unicode-math（需 xe/lua，不可 pdflatex）
-  if grep -rlqE '\\RequireLuaTeX' "$SRC" 2>/dev/null; then echo lualatex; return; fi
-  if grep -rlqE '\\RequireXeTeX' "$SRC" 2>/dev/null; then echo xelatex; return; fi
-  # fontspec/xeCJK/unicode-math 在 pdflatex 下会直接报错，默认按 xelatex 处理 / these error under pdflatex; default to xelatex
-  if grep -rlqE '\\(usepackage|RequirePackage)(\[[^]]*\])?\{(fontspec|xeCJK|unicode-math)\}' "$SRC" 2>/dev/null; then echo xelatex; return; fi
-  echo ""
-}
-COMPILER_SRC="用户填写 / user-provided"
-if [[ "$COMPILER" == "auto" ]]; then
-  if [[ -n "$PROBED_COMPILER" ]]; then COMPILER="$PROBED_COMPILER"; COMPILER_SRC="socket 探测 / socket-probed"
-  else
-    M="$(detect_compiler_magic)"
-    E="$(detect_compiler_engine_req)"
-    if [[ -n "$M" ]]; then COMPILER="$M"; COMPILER_SRC="魔法注释 / magic comment"
-    elif [[ -n "$E" ]]; then COMPILER="$E"; COMPILER_SRC="引擎声明探测（\\RequireXeTeX/fontspec 等）/ engine-requirement scan"
-    else COMPILER="pdflatex"; COMPILER_SRC="默认 / default"; fi
-  fi
-fi
-case "$COMPILER" in pdflatex|xelatex|lualatex|latex) ;; *) say "    未知编译器 '$COMPILER'，回退 pdflatex / unknown compiler, fallback pdflatex"; COMPILER="pdflatex"; COMPILER_SRC="回退 / fallback";; esac
+# ---- 编译器：严格按用户在表单里的选择，不做任何自动探测 ----
+# ---- compiler: strictly the user's choice from the form; no auto-detection ----
+COMPILER_SRC="用户选择 / user-selected"  # 已在顶部白名单校验过 / already allowlist-validated at the top
 
 # latexmk 引擎参数（与 CLSI 一致）/ latexmk engine flag (matches CLSI)
 case "$COMPILER" in
@@ -210,12 +180,8 @@ case "$COMPILER" in
   lualatex) ENGINE_FLAG="-lualatex";;
 esac
 
-# ---- 解析 TeXLive 年份 / resolve TeX Live year ----
-YEAR_SRC="用户填写 / user-provided"
-if [[ "$TEXLIVE" == "auto" ]]; then
-  if [[ -n "$PROBED_YEAR" ]]; then TEXLIVE="$PROBED_YEAR"; YEAR_SRC="socket 探测 / socket-probed"
-  else TEXLIVE="$LATEST_YEAR"; YEAR_SRC="默认最新 / default latest"; fi
-fi
+# ---- TeXLive 年份：严格按用户选择（已在顶部校验为 2020–2026）/ year: strictly the user's choice (validated 2020–2026 above) ----
+YEAR_SRC="用户选择 / user-selected"
 IMAGE="${REGISTRY}:${TEXLIVE}.1"
 
 say "==> 3/5 拉取镜像 / pulling image: $IMAGE"

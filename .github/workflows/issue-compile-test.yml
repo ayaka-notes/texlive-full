@@ -23,13 +23,13 @@ on:
         description: Overleaf 只读分享链接 / Overleaf read-only share link
         required: true
       compiler:
-        description: auto | pdflatex | xelatex | lualatex | latex
-        required: false
-        default: auto
+        description: pdflatex | xelatex | lualatex | latex (no auto)
+        required: true
+        default: pdflatex
       texlive:
-        description: auto | 2026 | 2025 | 2024 | 2023 | 2022 | 2021 | 2020
-        required: false
-        default: auto
+        description: "2026 | 2025 | 2024 | 2023 | 2022 | 2021 | 2020 (no auto)"
+        required: true
+        default: "2025"
       main_file:
         description: 主文件相对路径（可留空）/ main file relative path (optional)
         required: false

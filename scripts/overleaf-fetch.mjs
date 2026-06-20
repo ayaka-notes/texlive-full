@@ -132,17 +132,9 @@ async function main() {
   }
   logStep(`projectId = ${projectId}`)
 
-  // 3) 尽力探测编译器 / TeXLive 版本 / 主文件（通过 realtime socket，可能失败）
-  //    Best-effort probe of compiler / TeX Live image / root doc via the realtime socket (may fail).
-  let probed = { compiler: null, imageName: null, rootDocId: null, name: null, rootDocPath: null }
-  try {
-    probed = await probeViaSocket(origin, projectId, cookieHeader())
-    if (probed.compiler) logStep(`socket 探测成功 / socket probe ok: compiler=${probed.compiler}, imageName=${probed.imageName}`)
-  } catch (e) {
-    logStep(`socket 探测跳过 / socket probe skipped: ${e.message}`)
-  }
-
-  // 4) 下载项目 zip / download the project zip
+  // 3) 下载项目 zip / download the project zip
+  //    不做任何编译器/年份的自动探测；这些一律由用户在 issue 表单里明确选择。
+  //    No auto-detection of compiler/year; those come strictly from the user's form choice.
   logStep('下载项目 zip / downloading project zip ...')
   res = await fetch(origin + `/Project/${projectId}/download/zip`, {
     headers: { 'User-Agent': UA, Cookie: cookieHeader() },
@@ -156,88 +148,11 @@ async function main() {
   writeFileSync(zipOut, buf)
   logStep(`已保存 / saved ${zipOut} (${buf.length} bytes)`)
 
-  // 5) 写出元数据 / write metadata
-  const meta = {
-    link,
-    host: origin,
-    projectId,
-    name: probed.name,
-    compiler: probed.compiler, // 可能为 null / may be null -> 由表单/自动检测补足 / filled by form/auto-detect
-    imageName: probed.imageName, // 例 / e.g. "texlive-full:2025.1"
-    texliveYear: probed.imageName ? (probed.imageName.match(/(\d{4})/) || [])[1] || null : null,
-    rootDocPath: probed.rootDocPath,
-  }
+  // 4) 写出元数据（仅链接/主机/projectId）/ write metadata (link/host/projectId only)
+  const meta = { link, host: origin, projectId }
   writeFileSync(metaOut, JSON.stringify(meta, null, 2))
   logStep(`已保存元数据 / saved metadata ${metaOut}`)
   console.log(JSON.stringify(meta))
-}
-
-// realtime socket 探测：连接 socket.io 0.9 websocket，读取 joinProjectResponse
-// realtime socket probe: connect the socket.io 0.9 websocket and read joinProjectResponse
-async function probeViaSocket(origin, projectId, cookie) {
-  let WS
-  try {
-    WS = (await import('ws')).default // 可选依赖 / optional dependency
-  } catch {
-    throw new Error('ws 模块不可用 / ws module unavailable')
-  }
-  const host = new URL(origin).host
-  // socket.io 0.9 握手 / handshake
-  const hs = await fetch(`${origin}/socket.io/1/?projectId=${projectId}&t=${Date.now()}`, {
-    headers: { 'User-Agent': UA, Cookie: cookie },
-  })
-  const sid = (await hs.text()).split(':')[0]
-  if (!sid) throw new Error('握手失败 / handshake failed')
-  return await new Promise((resolve, reject) => {
-    const ws = new WS(`wss://${host}/socket.io/1/websocket/${sid}?projectId=${projectId}`, {
-      headers: { Cookie: cookie, Origin: origin, 'User-Agent': UA },
-    })
-    const timer = setTimeout(() => {
-      ws.terminate()
-      reject(new Error('超时 / timeout'))
-    }, 8000)
-    ws.on('error', e => {
-      clearTimeout(timer)
-      reject(new Error(e.message))
-    })
-    ws.on('message', raw => {
-      const d = raw.toString()
-      if (d === '2::') return ws.send('2::') // 心跳 / heartbeat
-      if (d.startsWith('5:')) {
-        try {
-          const msg = JSON.parse(d.slice(d.indexOf(':::') + 3))
-          if (msg.name === 'joinProjectResponse') {
-            const p = msg.args[0].project
-            const rootDocPath = findDocPath(p.rootFolder?.[0], p.rootDoc_id)
-            clearTimeout(timer)
-            ws.terminate()
-            resolve({
-              compiler: p.compiler || null,
-              imageName: p.imageName || null,
-              rootDocId: p.rootDoc_id || null,
-              name: p.name || null,
-              rootDocPath,
-            })
-          }
-        } catch {
-          /* ignore */
-        }
-      }
-    })
-  })
-}
-
-// 在文件树里按 doc id 找到主文件相对路径 / locate root doc path in the folder tree by id
-function findDocPath(folder, docId, prefix = '') {
-  if (!folder || !docId) return null
-  for (const d of folder.docs || []) {
-    if (d._id === docId) return prefix + d.name
-  }
-  for (const f of folder.folders || []) {
-    const r = findDocPath(f, docId, prefix + f.name + '/')
-    if (r) return r
-  }
-  return null
 }
 
 main().catch(e => {
