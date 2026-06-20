@@ -46,13 +46,17 @@ concurrency:
 
 jobs:
   compile-test:
+    # 用“标签 或 标题前缀”双判定：即便标签缺失（如标签未创建）也能触发
+    # Gate on label OR title prefix, so it still fires even if the label is missing (e.g. not yet created)
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issues' &&
-        contains(github.event.issue.labels.*.name, 'texlive-image-bug')) ||
+        (contains(github.event.issue.labels.*.name, 'texlive-image-bug') ||
+         startsWith(github.event.issue.title, '[TeXLive Image Bug]'))) ||
       (github.event_name == 'issue_comment' &&
-        contains(github.event.issue.labels.*.name, 'texlive-image-bug') &&
-        startsWith(github.event.comment.body, '/retest-compile'))
+        startsWith(github.event.comment.body, '/retest-compile') &&
+        (contains(github.event.issue.labels.*.name, 'texlive-image-bug') ||
+         startsWith(github.event.issue.title, '[TeXLive Image Bug]')))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
