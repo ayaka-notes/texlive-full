@@ -8,6 +8,8 @@ body:
       value: |
         Thanks for reporting! Use this template when a project **compiles on official Overleaf but fails with our TeXLive image (ayaka-notes/texlive-full)**.
 
+        Not sure how to share a project? See Overleaf's guide: [**Sharing a project**](https://docs.overleaf.com/collaborating/sharing-a-project) (turn on link sharing → copy the **"Anyone with this link can view"** link).
+
         After you submit, a bot downloads the project from your **read-only share link**, reproduces the compile with `latexmk` in the matching image, and posts back the **logs + compiled PDF**.
 
         > ⚠️ The linked content will be downloaded and compiled **publicly** — do not include private or unpublished material.
