@@ -114,26 +114,26 @@ jobs:
           PREVIEW_URL: ${{ steps.assets.outputs.preview_url }}
         run: |
           {
-            echo "> 🤖 自动编译复现 / automated compile reproduction"
+            echo "> 自动编译复现 / automated compile reproduction"
             echo ">"
             echo "> **Workflow run ID:** \`${RID}\` · [运行详情 / run details]($RUN_URL)"
             echo
             if [ "$LP" != "true" ]; then
-              echo "⚠️ 未能从表单读到合法的 Overleaf 只读分享链接。请编辑 issue 补全后评论 \`/retest-compile\` 重试。"
-              echo "⚠️ No valid Overleaf read-only share link was found in the form. Please edit the issue, then comment \`/retest-compile\` to retry."
+              echo "未能从表单读到合法的 Overleaf 只读分享链接。请编辑 issue 补全后评论 \`/retest-compile\` 重试。"
+              echo "No valid Overleaf read-only share link was found in the form. Please edit the issue, then comment \`/retest-compile\` to retry."
             else
-              echo "**📎 下载 / Downloads**"
+              echo "**下载 / Downloads**"
               echo
-              if [ -n "$ZIP_URL" ]; then echo "- 🗂️ 全部编译产物(zip) / all compiled outputs: [\`outputs.zip\`]($ZIP_URL)"; fi
-              if [ -n "$LOG_URL" ]; then echo "- 📄 编译日志 / compile log: [\`output.log\`]($LOG_URL)"; fi
+              if [ -n "$ZIP_URL" ]; then echo "- 全部编译产物(zip) / all compiled outputs: [\`outputs.zip\`]($ZIP_URL)"; fi
+              if [ -n "$LOG_URL" ]; then echo "- 编译日志 / compile log: [\`output.log\`]($LOG_URL)"; fi
               if [ -n "$PDF_URL" ]; then
-                echo "- 📕 生成的 PDF / compiled PDF: [\`output.pdf\`]($PDF_URL)"
+                echo "- 生成的 PDF / compiled PDF: [\`output.pdf\`]($PDF_URL)"
               else
-                echo "- 📕 生成的 PDF / compiled PDF: ❌ 未生成 / not produced"
+                echo "- 生成的 PDF / compiled PDF: 未生成 / not produced"
               fi
               echo
               if [ -n "$PREVIEW_URL" ]; then
-                echo "**🖼️ PDF 首页预览 / first-page preview**"
+                echo "**PDF 首页预览 / first-page preview**"
                 echo
                 echo "![PDF preview]($PREVIEW_URL)"
                 echo

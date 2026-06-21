@@ -67,10 +67,10 @@ MAIN_RAW="$MAIN"; MAIN="$(echo "${MAIN//$'\r'/}" | xargs 2>/dev/null)"
 # These values flow into shell / docker / network requests, so allowlist them first.
 # ============================================================================
 fail_input() {
-  echo "❌ 输入校验失败 / invalid input: $1" >&2
+  echo "输入校验失败 / invalid input: $1" >&2
   mkdir -p "$OUT"
   {
-    echo "## ❌ 输入校验失败 / Invalid input"
+    echo "## 输入校验失败 / Invalid input"
     echo
     echo "$1"
     echo
@@ -114,8 +114,8 @@ note() { echo "$@" >> "$SUMMARY"; }
 
 say "==> 1/5 从 Overleaf 下载项目 / downloading project from Overleaf"
 if ! node "$SCRIPT_DIR/overleaf-fetch.mjs" --link "$LINK" --zip "$WORK/project.zip" --meta "$WORK/meta.json"; then
-  note "❌ **下载失败 / Download failed** — 链接可能失效、未开启只读分享，或不是 \`/read/\` 链接。"
-  note "❌ The link may be invalid, link-sharing may be off, or it is not a \`/read/\` link."
+  note "**下载失败 / Download failed** — 链接可能失效、未开启只读分享，或不是 \`/read/\` 链接。"
+  note "The link may be invalid, link-sharing may be off, or it is not a \`/read/\` link."
   exit 7
 fi
 
@@ -127,7 +127,7 @@ PROJECT_NAME="$(get_meta projectId)"
 say "==> 2/5 解压项目 / unpacking project"
 SRC="$WORK/src"
 mkdir -p "$SRC"
-unzip -q -o "$WORK/project.zip" -d "$SRC" || { note "❌ 解压失败 / unzip failed"; exit 8; }
+unzip -q -o "$WORK/project.zip" -d "$SRC" || { note "解压失败 / unzip failed"; exit 8; }
 
 # ---- 解析主文件 / resolve main file ----
 # 优先级 / precedence: 用户指定 > 自动检测(含 \documentclass 与 \begin{document})
@@ -156,8 +156,8 @@ if [[ -n "$MAIN_REL" && -f "$SRC/$MAIN_REL" ]]; then
 else
   DETECTED_MAIN="$(find_main)"
   if [[ -z "$DETECTED_MAIN" ]]; then
-    note "❌ **找不到主文件 / Main file not found** — 未发现同时包含 \`\\documentclass\` 和 \`\\begin{document}\` 的 .tex。请在 issue 中填写主文件路径。"
-    note "❌ No .tex containing both \`\\documentclass\` and \`\\begin{document}\` was found. Please specify the main file path in the issue."
+    note "**找不到主文件 / Main file not found** — 未发现同时包含 \`\\documentclass\` 和 \`\\begin{document}\` 的 .tex。请在 issue 中填写主文件路径。"
+    note "No .tex containing both \`\\documentclass\` and \`\\begin{document}\` was found. Please specify the main file path in the issue."
     exit 9
   fi
   if [[ -n "$MAIN_REL" ]]; then
@@ -186,8 +186,8 @@ IMAGE="${REGISTRY}:${TEXLIVE}.1"
 
 say "==> 3/5 拉取镜像 / pulling image: $IMAGE"
 if ! docker pull "$IMAGE"; then
-  note "❌ **拉取镜像失败 / Failed to pull image** \`$IMAGE\` — 请确认该 TeXLive 年份的镜像存在。"
-  note "❌ Please verify the image for this TeX Live year exists."
+  note "**拉取镜像失败 / Failed to pull image** \`$IMAGE\` — 请确认该 TeXLive 年份的镜像存在。"
+  note "Please verify the image for this TeX Live year exists."
   exit 10
 fi
 
@@ -259,7 +259,7 @@ fi
 
 # ---- 生成 summary.md / build summary ----
 {
-  echo "## 🧪 TeXLive 镜像编译测试结果 / TeXLive image compile test result"
+  echo "## TeXLive 镜像编译测试结果 / TeXLive image compile test result"
   echo
   echo "| 项 / Item | 值 / Value |"
   echo "|---|---|"
@@ -269,15 +269,15 @@ fi
   echo "| TeXLive 年份 / Year | \`$TEXLIVE\` （来源 / source: $YEAR_SRC） |"
   echo "| 主文件 / Main file | \`$MAIN_REL\` |"
   echo "| latexmk 退出码 / exit code | \`$STATUS\` |"
-  echo "| 生成 PDF / PDF produced | $([ "$PDF_OK" = yes ] && echo "✅ 是 / yes ($PDF_SIZE bytes)" || echo "❌ 否 / no") |"
+  echo "| 生成 PDF / PDF produced | $([ "$PDF_OK" = yes ] && echo "是 / yes ($PDF_SIZE bytes)" || echo "否 / no") |"
   echo "| 用时 / Duration | ${ELAPSED}s |"
   echo
   if [[ "$PDF_OK" == yes && "$STATUS" -eq 0 ]]; then
-    echo "### ✅ 编译成功 / Compiled successfully"
+    echo "### 编译成功 / Compiled successfully"
     echo "本镜像可以编译该项目。若 Overleaf 同样成功，则非镜像问题；请附上你期望的差异。"
     echo "This image compiled the project. If Overleaf also succeeds, this is not an image bug; please describe the expected difference."
   else
-    echo "### ❌ 编译失败 / Compile failed"
+    echo "### 编译失败 / Compile failed"
     echo "本镜像未能编译该项目。下方为 \`output.log\` 末尾，完整日志见 Artifacts。"
     echo "This image failed to compile. The tail of \`output.log\` is below; full logs are attached as artifacts."
   fi

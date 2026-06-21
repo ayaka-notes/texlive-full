@@ -1,4 +1,4 @@
-name: 🐛 TeXLive Image Bug
+name: TeXLive Image Bug
 description: Compiles on official Overleaf, but fails with the ayaka-notes image
 title: "[TeXLive Image Bug]: "
 labels: ["texlive-image-bug"]
@@ -12,7 +12,7 @@ body:
 
         After you submit, a bot downloads the project from your **read-only share link**, reproduces the compile with `latexmk` in the matching image, and posts back the **logs + compiled PDF**.
 
-        > ⚠️ The linked content will be downloaded and compiled **publicly** — do not include private or unpublished material.
+        > Note: the linked content will be downloaded and compiled publicly — do not include private or unpublished material.
 
   - type: input
     id: share_link
@@ -21,8 +21,8 @@ body:
       description: |
         **MUST be the "View only" link** — in Overleaf open `Menu → Share → Turn on link sharing`, then copy the link under **"Anyone with this link can view"**. It contains `/read/` (e.g. `https://www.overleaf.com/read/xxxx#yyyy`).
 
-        ❌ Do **not** paste the "can edit" link (without `/read/`) — anonymous download of edit links is blocked by Overleaf.
-      placeholder: https://www.overleaf.com/read/xxxxxxxxxxxx#yyyyyy
+        Do not paste the "can edit" link (without `/read/`) — anonymous download of edit links is blocked by Overleaf.
+      placeholder: https://www.overleaf.com/read/xxxxxxxxxxxx#xxxxxx
     validations:
       required: true
 
