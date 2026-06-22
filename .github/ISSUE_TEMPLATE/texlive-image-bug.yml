@@ -1,6 +1,6 @@
-name: TeXLive Image Bug
+name: TeXLive Image Related
 description: Compiles on official Overleaf, but fails with the ayaka-notes image
-title: "[TeXLive Image Bug]: "
+title: "[TeXLive Image]: "
 labels: ["texlive-image-bug"]
 body:
   - type: markdown
@@ -66,21 +66,11 @@ body:
       placeholder: main.tex
 
   - type: textarea
-    id: overleaf_evidence
-    attributes:
-      label: Proof it compiles on Overleaf + the error you see here (optional)
-      description: |
-        Optional but very helpful: a screenshot of the successful Overleaf compile, and the **exact error** from this image / your self-hosted Overleaf (copy the relevant lines from the log, e.g. `! LaTeX Error: File 'xxx.sty' not found`). The bot reproduces the compile either way.
-      placeholder: |
-        Overleaf: compiles fine (screenshot attached)
-        This image: ! LaTeX Error: File `xxx.sty' not found. ...
-
-  - type: textarea
     id: extra
     attributes:
       label: Additional context (optional)
       description: |
-        Special packages/fonts used, self-hosted Overleaf version, the exact image tag (e.g. `ghcr.io/ayaka-notes/texlive-full:2025.1`), CPU architecture, etc.
+        Anything helpful: proof it compiles on Overleaf (e.g. a screenshot), the exact error you see with this image (copy the relevant log lines, e.g. `! LaTeX Error: File 'xxx.sty' not found`), special packages/fonts, self-hosted Overleaf version, the exact image tag (e.g. `ghcr.io/ayaka-notes/texlive-full:2025.1`), CPU architecture, etc.
 
   - type: checkboxes
     id: confirm
