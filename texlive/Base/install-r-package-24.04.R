@@ -1,8 +1,8 @@
 # CPU 核心检测
 cores <- parallel::detectCores()
 cat("Detected CPU cores:", cores, "\n")
-# 使用两倍并行
-jobs <- cores * 2
+# 包级并行交给 install.packages(Ncpus)，单包内部编译限 -j4，避免并发乘积过载
+jobs <- 4
 Sys.setenv(MAKEFLAGS = paste0("-j", jobs))
 cat("MAKEFLAGS =", Sys.getenv("MAKEFLAGS"), "\n")
 
@@ -764,20 +764,48 @@ if (any(is_bioc)) {
   }
 }
 
-# 剩下的再源码安装
-for(i in seq_along(pkg)){
-  # 如果是 Bioconductor 包，跳过
-  if(is_bioc[i]) next
+# 剩下的批量并行安装：dated 快照天然锁版本。先并行把源码包预下载成
+# 本地仓库（消除逐包串行下载延迟），大包排到队首缩短收尾长尾；然后
+# install.packages() 按依赖图生成 Makefile 拓扑排序并行编译。
+options(timeout = 300)
+todo <- pkg[!is_bioc]
+ap <- available.packages(repos = repo)
+cache <- "/tmp/pkg-cache/src/contrib"
+dir.create(cache, recursive = TRUE, showWarnings = FALSE)
+fetch <- todo[todo %in% rownames(ap)]
+urls <- paste0(ap[fetch, "Repository"], "/", fetch, "_", ap[fetch, "Version"], ".tar.gz")
+dest <- file.path(cache, basename(urls))
+invisible(parallel::mcmapply(function(u, d) {
+  for (k in 1:3) {
+    ok <- tryCatch(download.file(u, d, quiet = TRUE) == 0, error = function(e) FALSE)
+    if (ok && file.exists(d)) break
+    unlink(d)
+  }
+}, urls, dest, mc.cores = cores, mc.preschedule = FALSE))
+tools::write_PACKAGES(cache)
+heavy <- intersect(c("igraph", "stringi", "rstan", "StanHeaders", "s2", "sf", "terra", "Matrix", "V8"), todo)
+install.packages(
+  c(heavy, setdiff(todo, heavy)),
+  repos = c("file:///tmp/pkg-cache", repo),
+  lib = "/usr/local/lib/R/site-library",
+  Ncpus = parallel::detectCores()
+)
+
+# 少数 pin 与快照版本不一致（或上面装失败）的，退回精确安装（并行）
+ip0 <- installed.packages()
+need <- Filter(function(i) !is_bioc[i] &&
+  !(pkg[i] %in% rownames(ip0) && ip0[pkg[i], "Version"] == ver[i]), seq_along(pkg))
+invisible(parallel::mclapply(need, function(i) {
   cat("Installing", pkg[i], ver[i], "\n")
   try(remotes::install_version(
     pkg[i],
     version = ver[i],
     repos = repo,
     lib = "/usr/local/lib/R/site-library",
-    Ncpus = parallel::detectCores(),
+    Ncpus = 1,
     upgrade = "never"
   ))
-}
+}, mc.cores = max(1, cores %/% 4)))
 
 # 检查
 cat("\n===== Checking installed packages =====\n")
