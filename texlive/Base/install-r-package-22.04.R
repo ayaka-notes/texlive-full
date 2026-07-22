@@ -659,7 +659,11 @@ is_bioc <- pkg %in% bioc_avail
 # 若 CRAN 循环先跑，NMF 安装时 Biobase 还不存在。
 # 安装 BIO 系列包
 if (any(is_bioc)) {
-  options(repos = BiocManager::repositories())
+  # Bioc 依赖里的 CRAN 包（如 pcaMethods 依赖 MASS）也必须走锁版本快照：
+  # 最新 CRAN 的版本可能要求更新的 R，导致 "not available" 安装失败
+  bioc_r <- BiocManager::repositories()
+  bioc_r["CRAN"] <- repo
+  options(repos = bioc_r)
   for (i in which(is_bioc)) {
     cat("Installing Bioconductor package", pkg[i], ver[i], "\n")
     try(
