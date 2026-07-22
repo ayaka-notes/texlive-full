@@ -33,6 +33,14 @@ RUN mkdir -p /tmp/texmf-var && chmod -R 777 /tmp
 # -----------------------------------
 ENV DEBIAN_FRONTEND noninteractive
 
+# Use a faster apt mirror
+# ------------------------------------------
+# archive/security.ubuntu.com is a Canonical single point of failure. arm64
+# pulls from ports.ubuntu.com, so this rule is a no-op there.
+RUN for f in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do \
+        [ -f "$f" ] && sed -i -E 's,https?://(archive|security)\.ubuntu\.com/ubuntu,http://mirrors.edge.kernel.org/ubuntu,g' "$f"; \
+    done; true
+
 # Update to ensure dependencies are updated
 # ------------------------------------------
 ENV REBUILT_AFTER="2026-01-13"
