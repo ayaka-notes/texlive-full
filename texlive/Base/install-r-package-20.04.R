@@ -434,24 +434,12 @@ ver <- sub(".* ", "", lines)
 
 repo <- "https://packagemanager.posit.co/cran/2020-07-22"
 
-bioc_avail <- BiocManager::available()
+bioc_repos <- BiocManager::repositories()
+bioc_avail <- rownames(available.packages(repos = bioc_repos[names(bioc_repos) != "CRAN"]))
 is_bioc <- pkg %in% bioc_avail
 
-# 剩下的再源码安装
-for(i in seq_along(pkg)){
-  # 如果是 Bioconductor 包，跳过
-  if(is_bioc[i]) next
-  cat("Installing", pkg[i], ver[i], "\n")
-  try(remotes::install_version(
-    pkg[i],
-    version = ver[i],
-    repos = repo,
-    lib = "/usr/local/lib/R/site-library",
-    Ncpus = parallel::detectCores(),
-    upgrade = "never"
-  ))
-}
-
+# Bioc 包不在 CRAN 仓库里，必须先装：清单里的 NMF 依赖 Biobase，
+# 若 CRAN 循环先跑，NMF 安装时 Biobase 还不存在。
 # 安装 BIO 系列包
 if (any(is_bioc)) {
   options(repos = BiocManager::repositories())
@@ -466,6 +454,21 @@ if (any(is_bioc)) {
       )
     )
   }
+}
+
+# 剩下的再源码安装
+for(i in seq_along(pkg)){
+  # 如果是 Bioconductor 包，跳过
+  if(is_bioc[i]) next
+  cat("Installing", pkg[i], ver[i], "\n")
+  try(remotes::install_version(
+    pkg[i],
+    version = ver[i],
+    repos = repo,
+    lib = "/usr/local/lib/R/site-library",
+    Ncpus = parallel::detectCores(),
+    upgrade = "never"
+  ))
 }
 
 
