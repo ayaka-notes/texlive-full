@@ -795,21 +795,19 @@ install.packages(
   Ncpus = parallel::detectCores()
 )
 
-# 少数 pin 与快照版本不一致（或上面装失败）的，退回精确安装（并行）
+# 上面批量装失败的包补装一遍（串行，安全）。个别 pin 与快照版本有微小
+# 出入的直接用快照版本，不再逐包回装。
 ip0 <- installed.packages()
-need <- Filter(function(i) !is_bioc[i] &&
-  !(pkg[i] %in% rownames(ip0) && ip0[pkg[i], "Version"] == ver[i]), seq_along(pkg))
-invisible(parallel::mclapply(need, function(i) {
-  cat("Installing", pkg[i], ver[i], "\n")
-  try(remotes::install_version(
-    pkg[i],
-    version = ver[i],
-    repos = repo,
+miss <- setdiff(pkg[!is_bioc], rownames(ip0))
+if (length(miss) > 0) {
+  cat("Retrying failed packages:", paste(miss, collapse = " "), "\n")
+  install.packages(
+    miss,
+    repos = c("file:///tmp/pkg-cache", repo),
     lib = "/usr/local/lib/R/site-library",
-    Ncpus = 1,
-    upgrade = "never"
-  ))
-}, mc.cores = max(1, cores %/% 4)))
+    Ncpus = parallel::detectCores()
+  )
+}
 
 # 检查
 cat("\n===== Checking installed packages =====\n")

@@ -15,10 +15,10 @@ jobs:
       matrix:
         include:
           - platform: linux/amd64
-            runner: blacksmith-32vcpu-ubuntu-2404
+            runner: ubuntu-latest
             platform_pair: amd64
           - platform: linux/arm64
-            runner: blacksmith-32vcpu-ubuntu-2404-arm
+            runner: ubuntu-24.04-arm
             platform_pair: arm64
 
     runs-on: ${{ matrix.runner }}
