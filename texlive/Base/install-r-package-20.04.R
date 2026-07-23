@@ -1,14 +1,14 @@
 # CPU 核心检测
 cores <- parallel::detectCores()
 cat("Detected CPU cores:", cores, "\n")
-# 使用两倍并行
-jobs <- cores * 2
+# 包级并行交给 install.packages(Ncpus)，单包内部编译限 -j4，避免并发乘积过载
+jobs <- 4
 Sys.setenv(MAKEFLAGS = paste0("-j", jobs))
 cat("MAKEFLAGS =", Sys.getenv("MAKEFLAGS"), "\n")
 
 # 如果没有 remotes 就安装
 if (!requireNamespace("remotes", quietly = TRUE))
-  install.packages("remotes", repos="https://packagemanager.posit.co/cran/2020-07-22")
+  install.packages("remotes", repos="https://packagemanager.posit.co/cran/2020-07-24")
 
 # 安装 BiocManager 包
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -432,7 +432,7 @@ lines <- lines[nchar(lines) > 0]
 pkg <- sub(" .*", "", lines)
 ver <- sub(".* ", "", lines)
 
-repo <- "https://packagemanager.posit.co/cran/2020-07-22"
+repo <- "https://packagemanager.posit.co/cran/2020-07-24"
 
 bioc_repos <- BiocManager::repositories()
 bioc_avail <- rownames(available.packages(repos = bioc_repos[names(bioc_repos) != "CRAN"]))
@@ -442,7 +442,11 @@ is_bioc <- pkg %in% bioc_avail
 # 若 CRAN 循环先跑，NMF 安装时 Biobase 还不存在。
 # 安装 BIO 系列包
 if (any(is_bioc)) {
-  options(repos = BiocManager::repositories())
+  # Bioc 依赖里的 CRAN 包（如 pcaMethods 依赖 MASS）也必须走锁版本快照：
+  # 最新 CRAN 的版本可能要求更新的 R，导致 "not available" 安装失败
+  bioc_r <- BiocManager::repositories()
+  bioc_r["CRAN"] <- repo
+  options(repos = bioc_r)
   for (i in which(is_bioc)) {
     cat("Installing Bioconductor package", pkg[i], ver[i], "\n")
     try(
@@ -456,19 +460,80 @@ if (any(is_bioc)) {
   }
 }
 
-# 剩下的再源码安装
-for(i in seq_along(pkg)){
-  # 如果是 Bioconductor 包，跳过
-  if(is_bioc[i]) next
-  cat("Installing", pkg[i], ver[i], "\n")
-  try(remotes::install_version(
-    pkg[i],
-    version = ver[i],
-    repos = repo,
+# 剩下的批量并行安装：dated 快照天然锁版本。先并行把源码包预下载成
+# 本地仓库（消除逐包串行下载延迟），大包排到队首缩短收尾长尾；然后
+# install.packages() 按依赖图生成 Makefile 拓扑排序并行编译。
+options(timeout = 300)
+todo <- pkg[!is_bioc]
+ap <- available.packages(repos = repo)
+cache <- "/tmp/pkg-cache/src/contrib"
+dir.create(cache, recursive = TRUE, showWarnings = FALSE)
+fetch <- todo[todo %in% rownames(ap)]
+urls <- paste0(ap[fetch, "Repository"], "/", fetch, "_", ap[fetch, "Version"], ".tar.gz")
+dest <- file.path(cache, basename(urls))
+invisible(parallel::mcmapply(function(u, d) {
+  for (k in 1:3) {
+    ok <- tryCatch(download.file(u, d, quiet = TRUE) == 0, error = function(e) FALSE)
+    if (ok && file.exists(d)) break
+    unlink(d)
+  }
+}, urls, dest, mc.cores = cores, mc.preschedule = FALSE))
+tools::write_PACKAGES(cache)
+heavy <- intersect(c("igraph", "stringi", "rstan", "StanHeaders", "s2", "sf", "terra", "Matrix", "V8"), todo)
+install.packages(
+  c(heavy, setdiff(todo, heavy)),
+  repos = c("file:///tmp/pkg-cache", repo),
+  lib = "/usr/local/lib/R/site-library",
+  Ncpus = parallel::detectCores()
+)
+
+# 上面批量装失败的包补装一遍（串行，安全）。个别 pin 与快照版本有微小
+# 出入的直接用快照版本，不再逐包回装。
+ip0 <- installed.packages()
+miss <- setdiff(pkg[!is_bioc], rownames(ip0))
+if (length(miss) > 0) {
+  cat("Retrying failed packages:", paste(miss, collapse = " "), "\n")
+  install.packages(
+    miss,
+    repos = c("file:///tmp/pkg-cache", repo),
     lib = "/usr/local/lib/R/site-library",
-    Ncpus = parallel::detectCores(),
-    upgrade = "never"
-  ))
+    Ncpus = parallel::detectCores()
+  )
+}
+
+# 与清单版本不一致或仍缺失的，串行精确回装（冻结日快照下只剩 2~3 个）。
+# 直接按 URL 取指定版本 tarball、repos=NULL 本地安装：不做任何依赖解析，
+# 杜绝 remotes 之类把缺失依赖从 cloud CRAN 装成最新版（R 版本不兼容）的泄漏。
+# 按字母序单轮跑会踩依赖顺序（car 依赖 maptools/rio，但 m/r 排在 c 之后），
+# 多跑几轮直到没有新进展；链最深 3 层，5 轮上限绰绰有余。
+for (round in 1:5) {
+ip1 <- installed.packages(noCache = TRUE)
+progress <- FALSE
+for (i in seq_along(pkg)) {
+  if (is_bioc[i]) next
+  if (pkg[i] %in% rownames(ip1) && ip1[pkg[i], "Version"] == ver[i]) next
+  fname <- paste0(pkg[i], "_", ver[i], ".tar.gz")
+  urls <- c(
+    paste0(repo, "/src/contrib/", fname),
+    paste0(repo, "/src/contrib/Archive/", pkg[i], "/", fname),
+    paste0("https://cloud.r-project.org/src/contrib/", fname),
+    paste0("https://cloud.r-project.org/src/contrib/Archive/", pkg[i], "/", fname)
+  )
+  dest <- file.path(tempdir(), fname)
+  got <- FALSE
+  for (u in urls) {
+    got <- tryCatch(download.file(u, dest, quiet = TRUE) == 0, error = function(e) FALSE)
+    if (got && file.exists(dest)) break
+    unlink(dest)
+  }
+  if (!got) { cat("Pinning", pkg[i], ver[i], ": tarball not found\n"); next }
+  cat("Pinning", pkg[i], ver[i], "from", u, "\n")
+  try(install.packages(dest, repos = NULL, type = "source",
+                       lib = "/usr/local/lib/R/site-library"))
+  unlink(dest)
+  progress <- TRUE
+}
+if (!progress) break
 }
 
 
