@@ -1,0 +1,99 @@
+name: Sync texlive-full(tlnet)
+
+on:
+  workflow_dispatch:
+    inputs:
+      texlive_versions:
+        description: JSON array of TeX Live versions to sync (e.g., '["2025", "2026"]')
+        required: false
+        default: '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]'
+  schedule:
+    # 每天同步一次；冻结年份增量校验后跳过，2026 跟当天快照滚动
+    - cron: '30 2 * * *'
+
+env:
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: ayaka-notes/texlive-full
+
+jobs:
+  sync:
+    strategy:
+      fail-fast: false
+      # texlive.info 是单机服务器，限制并发别把它打挂
+      max-parallel: 2
+      matrix:
+        tex_version: ${{ fromJson(inputs.texlive_versions || '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]') }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GitHub Action
+        uses: actions/checkout@main
+        with:
+          submodules: true
+          token: ${{ secrets.ORGTOKEN }}
+
+      # 2020-2025 与 texlive/<year>/Dockerfile 里锁定的 tlnet-archive 日期一致；
+      # 2026 滚动，每次运行取当天
+      - name: Resolve snapshot date
+        id: snap
+        run: |
+          case "${{ matrix.tex_version }}" in
+            2020) d=2020/07/22 ;;
+            2021) d=2021/07/30 ;;
+            2022) d=2022/06/16 ;;
+            2023) d=2023/07/10 ;;
+            2024) d=2024/03/23 ;;
+            2025) d=2025/06/17 ;;
+            2026) d=$(date -u +%Y/%m/%d) ;;
+            *) echo "unknown version"; exit 1 ;;
+          esac
+          echo "date=$d" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 用上一次发布的镜像做种子：校验通过的容器直接复用，
+      # 第一次全量下载慢一点，之后每天只补差量
+      - name: Seed from previous image
+        run: |
+          mkdir -p tlnet-data
+          img=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:tlnet-cache-${{ matrix.tex_version }}
+          if docker pull "$img"; then
+            cid=$(docker create "$img" placeholder)
+            docker cp "$cid":/tlnet/. tlnet-data/
+            docker rm "$cid"
+            docker rmi "$img"
+            echo "seeded $(ls tlnet-data/archive 2>/dev/null | wc -l) containers"
+          else
+            echo "no previous image, full download"
+          fi
+
+      - name: Sync tlnet snapshot from texlive.info
+        run: python3 texlive/TlnetCache/fetch_tlnet.py "${{ steps.snap.outputs.date }}" tlnet-data
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
+
+      # FROM scratch + 单条 COPY = 单层拍平的纯数据镜像，无任何架构内容；
+      # 推成 amd64+arm64 双平台 manifest，两个架构的构建都能直接挂载，
+      # 层内容相同、blob 只存一份。同 tag 覆盖推送。
+      - name: Build and push tlnet data image
+        uses: docker/build-push-action@v7
+        with:
+          context: tlnet-data
+          file: texlive/TlnetCache/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:tlnet-cache-${{ matrix.tex_version }}
+          outputs: type=image,name-canonical=true,push=true
+          provenance: false
+          sbom: false
