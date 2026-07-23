@@ -4,6 +4,9 @@
 
 # Use base image, see texlive/base
 # -----------------------------------
+# tlnet snapshot cache (flat data image), mounted during the TeX Live install
+FROM ghcr.io/ayaka-notes/tlnet-cache:2024 AS tlnet
+
 FROM ghcr.io/ayaka-notes/texlive-full:base-24.04
 
 # LABEL
@@ -41,17 +44,14 @@ ARG TEXLIVE_MIRROR=https://texlive.info/tlnet-archive/${TEXLIVE_Version}/03/23/t
 
 # Install texlive like Overleaf
 # -----------------------------------
-RUN mkdir /install-tl-unx \
+RUN --mount=type=bind,from=tlnet,source=/tlnet,target=/tlnet \
+    mkdir /install-tl-unx \
 &&  wget --quiet https://tug.org/texlive/files/texlive.asc \
 &&  gpg --import texlive.asc \
 &&  rm texlive.asc \
-&&  wget --quiet ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz \
-&&  wget --quiet ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz.sha512 \
-&&  wget --quiet ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz.sha512.asc \
-&&  gpg --verify install-tl-unx.tar.gz.sha512.asc \
-&&  sha512sum -c install-tl-unx.tar.gz.sha512 \
-&&  tar -xz -C /install-tl-unx --strip-components=1 -f install-tl-unx.tar.gz \
-&&  rm install-tl-unx.tar.gz* \
+&&  gpg --verify /tlnet/install-tl-unx.tar.gz.sha512.asc /tlnet/install-tl-unx.tar.gz.sha512 \
+&&  ( cd /tlnet && sha512sum -c install-tl-unx.tar.gz.sha512 ) \
+&&  tar -xz -C /install-tl-unx --strip-components=1 -f /tlnet/install-tl-unx.tar.gz \
 &&  echo "tlpdbopt_autobackup 0" >> /install-tl-unx/texlive.profile \
 &&  echo "tlpdbopt_install_docfiles 0" >> /install-tl-unx/texlive.profile \
 &&  echo "tlpdbopt_install_srcfiles 0" >> /install-tl-unx/texlive.profile \
@@ -59,10 +59,10 @@ RUN mkdir /install-tl-unx \
     \
 &&  /install-tl-unx/install-tl \
       -profile /install-tl-unx/texlive.profile \
-      -repository ${TEXLIVE_MIRROR} \
+      -repository /tlnet \
     \
 &&  $(find /usr/local/texlive -name tlmgr) path add \
-&&  tlmgr install --repository ${TEXLIVE_MIRROR} \
+&&  tlmgr install --repository /tlnet \
       latexmk \
       texcount \
       synctex \
