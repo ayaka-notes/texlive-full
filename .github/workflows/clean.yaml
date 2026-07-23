@@ -1,4 +1,4 @@
-name: Clean Image(texlive-full)
+name: Clean texlive-full
 
 on:
   workflow_dispatch:
