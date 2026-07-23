@@ -13,7 +13,7 @@ on:
 
 env:
   DOCKER_REGISTRY: ghcr.io
-  IMAGE_NAME: ayaka-notes/texlive-full
+  IMAGE_NAME: ayaka-notes/tlnet-cache
 
 jobs:
   sync:
@@ -62,7 +62,7 @@ jobs:
       - name: Seed from previous image
         run: |
           mkdir -p tlnet-data
-          img=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:tlnet-cache-${{ matrix.tex_version }}
+          img=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex_version }}
           if docker pull "$img"; then
             cid=$(docker create "$img" placeholder)
             docker cp "$cid":/tlnet/. tlnet-data/
@@ -93,7 +93,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:tlnet-cache-${{ matrix.tex_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex_version }}
           outputs: type=image,name-canonical=true,push=true
           provenance: false
           sbom: false
