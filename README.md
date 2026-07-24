@@ -2,17 +2,17 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
-  <img alt="TeXLive Full — best TeX Live Full image for sandbox compile" src="assets/banner.svg" width="640">
+  <img alt="TeXLive Full — best TeX Live Full image for Overleaf sandbox" src="assets/banner.svg" width="640">
 </picture>
 
 <p>
-  <a href="https://overleaf-pro.ayaka.space/texlive"><img alt="Documentation" src="https://img.shields.io/badge/Docs-overleaf--pro.ayaka.space-111111?style=flat-square&labelColor=555555"></a>
-  <a href="https://github.com/ayaka-notes/texlive-full/pkgs/container/texlive-full"><img alt="Container image" src="https://img.shields.io/badge/GHCR-ghcr.io%2Fayaka--notes%2Ftexlive--full-111111?style=flat-square&logo=github&labelColor=555555"></a>
-  <a href="https://github.com/ayaka-notes/texlive-full/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/ayaka-notes/texlive-full?style=flat-square&color=111111&labelColor=555555"></a>
+  <a href="https://overleaf-pro.ayaka.space/texlive"><img alt="Documentation" src="https://img.shields.io/badge/Docs-overleaf--pro.ayaka.space-138A07?style=flat-square&logo=readthedocs&logoColor=white"></a>
+  <a href="https://github.com/ayaka-notes/texlive-full/pkgs/container/texlive-full"><img alt="Container image" src="https://img.shields.io/badge/GHCR-texlive--full-2496ED?style=flat-square&logo=docker&logoColor=white"></a>
+  <a href="https://github.com/ayaka-notes/texlive-full/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/ayaka-notes/texlive-full?style=flat-square&color=FFB000&logo=github&logoColor=white&labelColor=24292f"></a>
   <br>
-  <img alt="TeX Live versions" src="https://img.shields.io/badge/TeX%20Live-2020%20%E2%80%93%202026-111111?style=flat-square&labelColor=555555">
-  <img alt="Architectures" src="https://img.shields.io/badge/arch-amd64%20%7C%20arm64-111111?style=flat-square&labelColor=555555">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-111111?style=flat-square&labelColor=555555"></a>
+  <img alt="TeX Live versions" src="https://img.shields.io/badge/TeX%20Live-2020%20%E2%80%93%202026-008D9C?style=flat-square&logo=latex&logoColor=white">
+  <img alt="Architectures" src="https://img.shields.io/badge/arch-amd64%20%7C%20arm64-6E56CF?style=flat-square&logo=linux&logoColor=white">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-007EC6?style=flat-square"></a>
 </p>
 
 </div>
