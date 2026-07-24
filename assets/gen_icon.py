@@ -72,18 +72,21 @@ def build_banner(fg, bg, muted):
     cy = H/2
     disc = disc_group(fg, bg, cx=150, cy=cy, scale=0.80)
     fam = "Georgia,'Times New Roman',serif"
-    # Wordmark "TeXLive Full" with TeX-style lowered e
+    # Wordmark: real TeX lockup  ->  T \kern-.1667em \lower.5ex E \kern-.125em X
     wx = 320
     wy = 120
     fs = 78
+    k1 = round(-0.1667 * fs, 1)   # kern before E
+    k2 = round(-0.125 * fs, 1)    # kern before X
+    low = round(0.22 * fs, 1)     # lower E by ~0.5ex
     word = (
-        f'<g font-family="{fam}" fill="{fg}">'
-        f'<text x="{wx}" y="{wy}" font-size="{fs}" font-weight="700" letter-spacing="1">'
+        f'<g font-family="{fam}" fill="{fg}" font-weight="700">'
+        f'<text x="{wx}" y="{wy}" font-size="{fs}" letter-spacing="0">'
         f'<tspan>T</tspan>'
-        f'<tspan dy="14" font-size="{int(fs*0.82)}">e</tspan>'
-        f'<tspan dy="-14">X</tspan>'
-        f'<tspan>Live</tspan>'
-        f'<tspan dx="18" fill="{fg}">Full</tspan>'
+        f'<tspan dx="{k1}" dy="{low}">E</tspan>'
+        f'<tspan dx="{k2}" dy="{-low}">X</tspan>'
+        f'<tspan dx="6">Live</tspan>'
+        f'<tspan dx="20">Full</tspan>'
         f'</text></g>')
     tagline = (
         f'<text x="{wx+3}" y="{wy+52}" font-family="{fam}" font-size="27" '
