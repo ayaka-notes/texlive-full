@@ -14,5 +14,5 @@
 </g>
   <g font-family="Georgia,'Times New Roman',serif" fill="#111111" font-weight="700"><text x="320" y="120" font-size="78" letter-spacing="0"><tspan>T</tspan><tspan dx="-13.0" dy="17.2">E</tspan><tspan dx="-9.8" dy="-17.2">X</tspan><tspan dx="6">Live</tspan><tspan dx="20">Full</tspan></text></g>
   <text x="323" y="172" font-family="Georgia,'Times New Roman',serif" font-size="27" fill="#555555" font-style="italic">Best TeX Live Full image for Overleaf Sandbox.</text>
-  <rect x="323" y="192" width="470" height="3" fill="#111111" opacity="0.85"/>
+  <rect x="323" y="192" width="580" height="3" fill="#111111" opacity="0.85"/>
 </svg>

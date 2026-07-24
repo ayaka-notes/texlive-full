@@ -92,7 +92,7 @@ def build_banner(fg, bg, muted):
         f'<text x="{wx+3}" y="{wy+52}" font-family="{fam}" font-size="27" '
         f'fill="{muted}" font-style="italic">'
         f'Best TeX Live Full image for Overleaf Sandbox.</text>')
-    rule = f'<rect x="{wx+3}" y="{wy+72}" width="470" height="3" fill="{fg}" opacity="0.85"/>'
+    rule = f'<rect x="{wx+3}" y="{wy+72}" width="580" height="3" fill="{fg}" opacity="0.85"/>'
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">
   {disc}
   {word}
