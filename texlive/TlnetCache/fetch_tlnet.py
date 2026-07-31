@@ -51,8 +51,13 @@ def main():
     os.makedirs(f"{dest}/archive", exist_ok=True)
 
     # installer tarball + signatures (small, always refresh)
+    # drop the seeded copies first: .sha512/.asc have a constant byte length, so
+    # `curl -C -` reports them complete and silently keeps the stale ones, while
+    # the tarball gets a newer tail appended onto an older prefix
     for f in ("install-tl-unx.tar.gz", "install-tl-unx.tar.gz.sha512",
               "install-tl-unx.tar.gz.sha512.asc"):
+        if os.path.exists(f"{dest}/{f}"):
+            os.remove(f"{dest}/{f}")
         if not curl(f"{base}/{f}", f"{dest}/{f}"):
             sys.exit(f"download failed: {f}")
 
