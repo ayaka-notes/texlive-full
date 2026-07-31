@@ -50,11 +50,26 @@ def main():
     os.makedirs(f"{dest}/tlpkg", exist_ok=True)
     os.makedirs(f"{dest}/archive", exist_ok=True)
 
-    # installer tarball + signatures (small, always refresh)
-    for f in ("install-tl-unx.tar.gz", "install-tl-unx.tar.gz.sha512",
-              "install-tl-unx.tar.gz.sha512.asc"):
-        if not curl(f"{base}/{f}", f"{dest}/{f}"):
+    # installer checksums/signature (small, always refresh)
+    for f in ("install-tl-unx.tar.gz.sha512", "install-tl-unx.tar.gz.sha512.asc"):
+        path = f"{dest}/{f}"
+        if os.path.exists(path):
+            os.remove(path)
+        if not curl(f"{base}/{f}", path):
             sys.exit(f"download failed: {f}")
+
+    # installer tarball: must match the downloaded sha512
+    installer = f"{dest}/install-tl-unx.tar.gz"
+    want = open(f"{installer}.sha512").read().split()[0]
+    for attempt in range(6):
+        if os.path.exists(installer) and sha512(installer) == want:
+            break
+        if os.path.exists(installer):
+            os.remove(installer)
+        if not curl(f"{base}/install-tl-unx.tar.gz", installer):
+            sys.exit("download failed: install-tl-unx.tar.gz")
+    else:
+        sys.exit("install-tl-unx.tar.gz keeps failing sha512 verification")
 
     # tlpdb, verified against its sha512
     tlpdb = f"{dest}/tlpkg/texlive.tlpdb"
