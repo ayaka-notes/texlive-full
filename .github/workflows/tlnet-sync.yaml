@@ -6,7 +6,7 @@ on:
       texlive_versions:
         description: JSON array of TeX Live versions to sync (e.g., '["2025", "2026"]')
         required: false
-        default: '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]'
+        default: '["2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"]'
   schedule:
     # 每天同步一次；冻结年份增量校验后跳过，2026 跟当天快照滚动
     - cron: '30 2 * * *'
@@ -22,7 +22,7 @@ jobs:
       # texlive.info 是单机服务器，限制并发别把它打挂
       max-parallel: 2
       matrix:
-        tex_version: ${{ fromJson(inputs.texlive_versions || '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]') }}
+        tex_version: ${{ fromJson(inputs.texlive_versions || '["2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"]') }}
 
     runs-on: ubuntu-latest
 
@@ -33,12 +33,13 @@ jobs:
           submodules: true
           token: ${{ secrets.ORGTOKEN }}
 
-      # 2020-2025 与 texlive/<year>/Dockerfile 里锁定的 tlnet-archive 日期一致；
+      # 冻结年份的 tlnet-archive 日期，此处是唯一来源：它决定 tlnet-cache:<year> 的内容
       # 2026 滚动，每次运行取当天
       - name: Resolve snapshot date
         id: snap
         run: |
           case "${{ matrix.tex_version }}" in
+            2019) d=2019/12/02 ;;
             2020) d=2020/07/22 ;;
             2021) d=2021/07/30 ;;
             2022) d=2022/06/16 ;;

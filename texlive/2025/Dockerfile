@@ -38,9 +38,6 @@ RUN chown -R tex:tex /home/tex/latexminted
 # ARG For TEXLIVE
 # -----------------------------------
 ARG TEXLIVE_Version=2025
-# ARG TEXLIVE_MIRROR=https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TEXLIVE_Version}/tlnet-final
-# ARG TEXLIVE_MIRROR=https://mirrors.mit.edu/CTAN/systems/texlive/tlnet/
-ARG TEXLIVE_MIRROR=https://texlive.info/tlnet-archive/${TEXLIVE_Version}/06/17/tlnet
 
 
 # Install texlive like Overleaf
