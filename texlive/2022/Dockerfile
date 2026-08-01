@@ -42,6 +42,7 @@ ARG TEXLIVE_Version=2022
 # Install texlive like Overleaf
 # -----------------------------------
 RUN --mount=type=bind,from=tlnet,source=/tlnet,target=/tlnet \
+    --mount=type=bind,source=update.sh,target=/tmp/update.sh \
     mkdir /install-tl-unx \
 &&  wget --quiet https://tug.org/texlive/files/texlive.asc \
 &&  gpg --import texlive.asc \
@@ -66,6 +67,7 @@ RUN --mount=type=bind,from=tlnet,source=/tlnet,target=/tlnet \
       etoolbox \
       xetex \
 &&  tlmgr path add \
+&&  sh /tmp/update.sh \
 &&  rm -rf /install-tl-unx
 
 

@@ -6,7 +6,7 @@
 </picture>
 
 <p>
-  <a href="https://overleaf-pro.ayaka.space/texlive"><img alt="Documentation" src="https://img.shields.io/badge/Docs-overleaf--pro.ayaka.space-138A07?style=flat-square&logo=readthedocs&logoColor=white"></a>
+  <a href="https://ayakaleaf-pro.ayaka.space/texlive"><img alt="Documentation" src="https://img.shields.io/badge/Docs-ayakaleaf--pro.ayaka.space-138A07?style=flat-square&logo=readthedocs&logoColor=white"></a>
   <a href="https://github.com/ayaka-notes/texlive-full/pkgs/container/texlive-full"><img alt="Container image" src="https://img.shields.io/badge/GHCR-texlive--full-2496ED?style=flat-square&logo=docker&logoColor=white"></a>
   <a href="https://github.com/ayaka-notes/texlive-full/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/ayaka-notes/texlive-full?style=flat-square&color=FFB000&logo=github&logoColor=white&labelColor=24292f"></a>
   <br>
