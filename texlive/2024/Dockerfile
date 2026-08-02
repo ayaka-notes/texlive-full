@@ -75,7 +75,8 @@ RUN --mount=type=bind,from=tlnet,source=/tlnet,target=/tlnet \
 # System font configuration for XeTeX and LuaTeX
 RUN echo "OSFONTDIR = /usr/share/fonts//" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf
 COPY 09-texlive.conf /etc/fonts/conf.d/
-RUN fc-cache -fsv
+RUN fc-cache -fsv \
+&&  luaotfload-tool --update
 
 
 # Config file /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf
