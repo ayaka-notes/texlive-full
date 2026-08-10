@@ -17,7 +17,7 @@
 
 </div>
 
-A fully-featured **TeXLive Docker image** designed for sandboxed LaTeX compilation in Overleaf Pro, Overleaf CEP, or standalone LaTeX compilation environments.
+A fully-featured **TeXLive Docker image** designed for sandboxed LaTeX compilation in [Ayakaleaf Pro](https://github.com/ayaka-notes/ayakaleaf-pro), [Overleaf CEP](https://github.com/yu-i-i/overleaf-cep), or standalone LaTeX compilation environments.
 
 This image aims to provide an almost complete TeXLive distribution with common fonts and tools preinstalled, in order to minimize compilation failures caused by missing packages or fonts. Notes: This Docker Image **doesn't contain** any sharelatex/overleaf component. It's used for Overleaf/Overleaf Pro's compile.
 
