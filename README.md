@@ -24,21 +24,22 @@ This image aims to provide an almost complete TeXLive distribution with common f
 
 ## ✨ Features
 
+> [!Note]
+> Our TeX Live distribution has undergone rigorous testing across more than 10,000 LaTeX projects, all of which compiled successfully without errors. Our goal is to provide you with a self-hosted Overleaf experience that is as good as — or even better than — the official Overleaf service.
+
 - 🚀 Support Both x86_64 and arm64 server architectures
 - 📦 Full and Optimized TeXLive installation
 - 🧩 Preinstalled common fonts and utilities
 - 🐳 Ready to use with Docker and Docker Compose  
-- 🧪 Tested with Overleaf Server Pro / Overleaf Pro  
+- 🧪 Tested with Overleaf CEP / Ayakaleaf Pro 
 - 🔄 Regularly Updated with Latest TeXLive Releases
 - 🏷 Multiple TeXLive Version tags (2020 – Latest)
 - 🧑‍🔬 Knitr support for R code in LaTeX documents
 
 
+## 🎯 Ayakaleaf Pro Usage
 
-
-## 🎯 Overleaf Pro Usage
-
-TeXLive Full by Ayaka-notes is specially designed for [overleaf-pro](https://github.com/ayaka-notes/overleaf-pro), you can use the following environment variables to `config/variables.env` file if you are [toolkit user](https://github.com/overleaf/toolkit).
+TeXLive Full by Ayaka-notes is specially designed for [ayakaleaf-pro](https://github.com/ayaka-notes/ayakaleaf-pro), you can use the following environment variables to `config/variables.env` file if you are [toolkit user](https://github.com/overleaf/toolkit).
 
 For example:
 ```
@@ -47,7 +48,7 @@ ALL_TEX_LIVE_DOCKER_IMAGE_NAMES=Texlive 2026, Texlive 2025
 TEX_LIVE_DOCKER_IMAGE=ghcr.io/ayaka-notes/texlive-full:2026.1
 ```
 
-If you need more help, refer to [overleaf pro documentation](https://overleaf-pro.ayaka.space/on-premises/configuration/overleaf-toolkit/sandboxed-compiles)
+If you need more help, refer to [ayakaleaf pro documentation](https://ayakaleaf-pro.ayaka.space/on-premises/configuration/overleaf-toolkit/sandboxed-compiles)
 
 
 ## 📦 Available TeXLive Version
