@@ -62,8 +62,14 @@ def main():
             sys.exit(f"download failed: {f}")
 
     # tlpdb, verified against its sha512
+    # same trap as above: the seeded .sha512/.asc have a constant byte length,
+    # so `curl -C -` reports them complete and keeps the previous snapshot's
+    # copy. The seeded tlpdb then verifies against that stale hash and the new
+    # snapshot is never fetched. Drop them first.
     tlpdb = f"{dest}/tlpkg/texlive.tlpdb"
     for f in ("tlpkg/texlive.tlpdb.sha512", "tlpkg/texlive.tlpdb.sha512.asc"):
+        if os.path.exists(f"{dest}/{f}"):
+            os.remove(f"{dest}/{f}")
         if not curl(f"{base}/{f}", f"{dest}/{f}"):
             sys.exit(f"download failed: {f}")
     want = open(f"{tlpdb}.sha512").read().split()[0]
