@@ -34,7 +34,6 @@ jobs:
           token: ${{ secrets.ORGTOKEN }}
 
       # 冻结年份的 tlnet-archive 日期，此处是唯一来源：它决定 tlnet-cache:<year> 的内容
-      # 2026 滚动，每次运行取当天
       - name: Resolve snapshot date
         id: snap
         run: |
@@ -46,7 +45,7 @@ jobs:
             2023) d=2023/07/10 ;;
             2024) d=2024/03/23 ;;
             2025) d=2025/06/17 ;;
-            2026) d=$(date -u +%Y/%m/%d) ;;
+            2026) d=2026/06/25 ;;
             *) echo "unknown version"; exit 1 ;;
           esac
           echo "date=$d" >> "$GITHUB_OUTPUT"

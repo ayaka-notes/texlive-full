@@ -7,7 +7,7 @@
 # tlnet snapshot cache (flat data image), mounted during the TeX Live install
 FROM ghcr.io/ayaka-notes/tlnet-cache:2026 AS tlnet
 
-FROM ghcr.io/ayaka-notes/texlive-full:base-24.04
+FROM ghcr.io/ayaka-notes/texlive-full:base-2026
 
 # LABEL
 # -----------------------------------

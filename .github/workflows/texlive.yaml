@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       ubuntu_versions:
-        description: JSON array of Ubuntu versions for Base image (e.g., '["22.04", "24.04"]')
+        description: JSON array of Base image variants (Ubuntu version or TeX Live year, e.g., '["24.04", "2026"]')
         required: false
-        default: '["20.04", "22.04", "24.04"]'
+        default: '["20.04", "22.04", "24.04", "2026"]'
       base_cache:
         description: Whether to enable cache for Base image builds (true/false)
         required: true
