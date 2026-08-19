@@ -21,7 +21,7 @@ import subprocess
 import sys
 import time
 
-JOBS = 16
+JOBS = 6
 ARCHES = ("x86_64-linux", "aarch64-linux")
 
 
@@ -118,12 +118,16 @@ def main():
         fn = f"{dest}/archive/{name}.tar.xz"
         if os.path.exists(fn) and os.path.getsize(fn) == sz and sha512(fn) == cs:
             return "skip", name
-        for _ in range(4):
+        for attempt in range(4):
             curl(f"{base}/archive/{name}.tar.xz", fn)
             if os.path.exists(fn) and os.path.getsize(fn) == sz and sha512(fn) == cs:
                 return "ok", name
             if os.path.exists(fn) and os.path.getsize(fn) > sz:
                 os.remove(fn)  # broken resume grows past the real size
+            # texlive.info is a single box; when a snapshot changes we pull
+            # hundreds of containers at once and it starts refusing. Back off
+            # instead of retrying straight into the same wall.
+            time.sleep(3 * (attempt + 1))
         return "fail", name
 
     t0 = time.time()
