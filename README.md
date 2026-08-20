@@ -73,8 +73,7 @@ We use mirror archive from [texlive info](https://texlive.info/tlnet-archive/), 
 
 > Why texlive 2019 and earlier are not supported ?
 >
-> To maintain such images is more than difficult. And we believe you may not use it any more since it's too old. If you need, open a issue to let me know.
-
+> Maintaining these old images is extremely difficult. Also, the [texlive info](https://texlive.info/tlnet-archive/) website does not provide information for TeX Live versions released before 2019, so we are unable to build images for those versions. If you need a specific old version, please open an issue and let us know.
 
 
 ## Contained Component
