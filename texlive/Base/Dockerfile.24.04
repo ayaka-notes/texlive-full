@@ -77,7 +77,7 @@ RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula sele
     && tar -xf gf.tar.gz \
     && mkdir -p /usr/share/fonts/truetype/google-fonts \
     && find $PWD/fonts-main/ -name "*.ttf" -exec install -m644 {} /usr/share/fonts/truetype/google-fonts/ \; || return 1 \
-    && rm -f gf.tar.gz \
+    && rm -rf gf.tar.gz fonts-main \
     && fc-cache -f && rm -rf /var/cache/*
 
 # Install R packages (one shot, non-interactive, pinned repo)
