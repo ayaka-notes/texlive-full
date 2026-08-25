@@ -21,6 +21,7 @@ jobs:
   build-basic:
     strategy:
       fail-fast: false
+      max-parallel: 6
       matrix:
         tex-version: ${{ fromJson(inputs.texlive_versions) }}
         platform: [linux/amd64, linux/arm64]
@@ -37,9 +38,6 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     steps:
-      - name: Rand Wait to Avoid Thundering Herd
-        run: sleep $((RANDOM % 500 + 1))
-
       - name: Checkout GitHub Action
         uses: actions/checkout@main
         with:
