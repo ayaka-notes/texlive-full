@@ -123,7 +123,8 @@ While build texlive image(before 2019), you may need to pay attention to the fol
 - Only `http`/`ftp` is supported before texlive 2017, so you can't use `https` to download, unless you modify the `peal` script.
 - Before 2015, only sha256 file is provided. So you can't use sha512 to check.
 
-## Release Notes
+## Release Note
+- (2026.8.5): TeXLive 2026.1 image is final.
 - (2026.3.12): Unified arm64 and amd64 images into a single OCI multi-architecture image.
 - (2026.3.3): TexLive 2026.1 image has been released.
 - (2026.2.1): We add a `tex` user to align with Overleaf's default compile image.
