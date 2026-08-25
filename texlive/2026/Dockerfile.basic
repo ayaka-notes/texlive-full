@@ -1,0 +1,133 @@
+# ---------------------------------------------
+# Overleaf TexLive 2026 basic (ayaka-notes/overleaf)
+# ---------------------------------------------
+
+# ---------------------------------------------
+# How to build?
+# $ docker build -t ghcr.io/ayaka-notes/texlive-basic:2026.1 -f ./texlive/2026/Dockerfile.basic ./texlive/2026
+# ---------------------------------------------
+
+# Self-contained: starts from ubuntu instead of the base image and installs
+# scheme-basic plus an explicit package list, the same shape Overleaf's
+# server-ce uses, with xetex and fontspec added so xelatex actually works.
+# Skips R and the full font set. Intended for space-constrained environments
+# such as GitHub Codespaces.
+
+# tlnet snapshot cache (flat data image), mounted during the TeX Live install
+FROM ghcr.io/ayaka-notes/tlnet-cache:2026 AS tlnet
+
+FROM ubuntu:24.04
+
+# LABEL
+# -----------------------------------
+LABEL \
+    org.opencontainers.image.title="Docker Image of TeXLive (basic)" \
+    org.opencontainers.image.authors="ayaka-notes <public@ayaka.space>" \
+    org.opencontainers.image.source="https://github.com/ayaka-notes/texlive-full" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.description="Overleaf TeXLive basic Image by ayaka-notes"
+
+# Makes sure LuaTex cache is writable
+# -----------------------------------
+ENV TEXMFVAR=/tmp/texmf-var
+RUN mkdir -p /tmp/texmf-var && chmod -R 777 /tmp
+
+# Set ENV to noninteractive
+# -----------------------------------
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set up tex user and home directory (match upstream)
+# ---------------------------------------------------
+RUN set -eux; \
+    user="$(getent passwd 1000 | cut -d: -f1 || true)"; \
+    if [ -n "$user" ]; then userdel -r "$user"; fi; \
+    group="$(getent group 1000 | cut -d: -f1 || true)"; \
+    if [ -n "$group" ]; then groupdel "$group"; fi; \
+    groupadd -g 1000 tex; \
+    useradd -m -u 1000 -g 1000 -d /home/tex -s /bin/sh \
+    -c "You are in a sandboxed container without access to outside resources ^_^" \
+    tex; \
+    passwd -d tex; \
+    chmod 750 /home/tex
+
+# Install dependencies
+# --------------------
+# The first three match the Overleaf development image. The rest are what
+# installing TeX Live and running latexmk need: wget/gnupg/ca-certificates to
+# fetch and verify, perl for latexmk, xz-utils to unpack the containers.
+# inkscape is left out: it pulls 185 packages for ~331 MB, by far the largest
+# single item here. Add it separately if \includesvg is needed.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    fontconfig python3-pygments qpdf \
+    wget gnupg ca-certificates perl xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy LatexMk... file
+# -----------------------------------
+COPY LatexMk /usr/local/share/latexmk/LatexMk
+COPY patchSynctex.R /usr/local/bin/
+COPY run-chktex.sh /usr/local/bin/
+COPY ./latexminted /home/tex/latexminted
+
+# Set file exec mod
+# -----------------------------------
+RUN chmod +x /usr/local/bin/* && chmod +x /usr/local/share/latexmk/*
+RUN chown -R tex:tex /home/tex/latexminted
+
+# ARG For TEXLIVE
+# -----------------------------------
+ARG TEXLIVE_BIN_ARCH=x86_64-linux
+ARG TEXLIVE_Version=2026
+
+# Install texlive like Overleaf
+# -----------------------------------
+RUN --mount=type=bind,from=tlnet,source=/tlnet,target=/tlnet \
+    mkdir /install-tl-unx \
+&&  wget --quiet https://tug.org/texlive/files/texlive.asc \
+&&  gpg --import texlive.asc \
+&&  rm texlive.asc \
+&&  gpg --verify /tlnet/install-tl-unx.tar.gz.sha512.asc /tlnet/install-tl-unx.tar.gz.sha512 \
+&&  ( cd /tlnet && sha512sum -c install-tl-unx.tar.gz.sha512 ) \
+&&  tar -xz -C /install-tl-unx --strip-components=1 -f /tlnet/install-tl-unx.tar.gz \
+&&  echo "tlpdbopt_autobackup 0" >> /install-tl-unx/texlive.profile \
+&&  echo "tlpdbopt_install_docfiles 0" >> /install-tl-unx/texlive.profile \
+&&  echo "tlpdbopt_install_srcfiles 0" >> /install-tl-unx/texlive.profile \
+&&  echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile \
+    \
+&&  /install-tl-unx/install-tl \
+      -profile /install-tl-unx/texlive.profile \
+      -repository /tlnet \
+    \
+&&  $(find /usr/local/texlive -name tlmgr) path add \
+&&  tlmgr install --repository /tlnet \
+      latexmk \
+      texcount \
+      synctex \
+      etoolbox \
+      xetex \
+      fontspec \
+      unicode-math \
+      chktex \
+      minted \
+      pygmentex \
+      biblatex \
+      biber \
+&&  tlmgr path add \
+&&  rm -rf /install-tl-unx
+
+# System font configuration for XeTeX and LuaTeX
+RUN echo "OSFONTDIR = /usr/share/fonts//" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf
+COPY 09-texlive.conf /etc/fonts/conf.d/
+RUN fc-cache -fsv \
+&&  luaotfload-tool --update
+
+# Config file /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf
+# Enable shell-escape and so on
+# -----------------------------------
+RUN echo "shell_escape = t" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf && \
+    echo "openout_any = a" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf && \
+    echo "openin_any = a" >> /usr/local/texlive/${TEXLIVE_Version}/texmf.cnf
+
+# Set PATH ENV
+# -----------------------------------
+ENV PATH="/usr/local/texlive/${TEXLIVE_Version}/bin/${TEXLIVE_BIN_ARCH}:${PATH}"
