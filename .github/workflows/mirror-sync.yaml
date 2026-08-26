@@ -7,6 +7,9 @@ on:
         description: JSON array of TeX Live versions to sync (e.g., '["2025", "2026"]')
         required: false
         default: '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]'
+  schedule:
+    # 每天同步一次；与 tlnet-sync (02:30 UTC) 错峰一小时
+    - cron: '30 3 * * *'
 
 env:
   DOCKER_REGISTRY: ghcr.io
