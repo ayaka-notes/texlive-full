@@ -1,0 +1,47 @@
+name: Sync texlive-full(mirror)
+
+on:
+  workflow_dispatch:
+    inputs:
+      texlive_versions:
+        description: JSON array of TeX Live versions to sync (e.g., '["2025", "2026"]')
+        required: false
+        default: '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]'
+
+env:
+  SOURCE_REGISTRY: ghcr.io
+  SOURCE_IMAGE_NAME: ayaka-notes/texlive-full
+  MIRROR_REGISTRY: registry.cn-hangzhou.aliyuncs.com
+  MIRROR_IMAGE_NAME: ayaka-notes/texlive-full
+  MIRROR_USERNAME: musicminion
+
+jobs:
+  sync:
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        tex_version: ${{ fromJson(inputs.texlive_versions || '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]') }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Login to registries
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+            skopeo login ${{ env.SOURCE_REGISTRY }} --username "${{ github.actor }}" --password-stdin
+          echo "${{ secrets.ALIYUN_REGISTRY_TOKEN }}" | \
+            skopeo login ${{ env.MIRROR_REGISTRY }} --username "${{ env.MIRROR_USERNAME }}" --password-stdin
+
+      # skopeo copy --all 原样搬运 manifest list 和全部架构的层，
+      # 不重新构建、digest 不变，阿里云侧与 ghcr 完全一致
+      - name: Copy image to Aliyun mirror
+        run: |
+          skopeo copy --all --retry-times 3 \
+            docker://${{ env.SOURCE_REGISTRY }}/${{ env.SOURCE_IMAGE_NAME }}:${{ matrix.tex_version }}.1 \
+            docker://${{ env.MIRROR_REGISTRY }}/${{ env.MIRROR_IMAGE_NAME }}:${{ matrix.tex_version }}.1
+
+      - name: Inspect mirrored image
+        run: |
+          skopeo inspect --raw \
+            docker://${{ env.MIRROR_REGISTRY }}/${{ env.MIRROR_IMAGE_NAME }}:${{ matrix.tex_version }}.1
