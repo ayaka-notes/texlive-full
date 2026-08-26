@@ -75,6 +75,15 @@ We use mirror archive from [texlive info](https://texlive.info/tlnet-archive/), 
 >
 > Maintaining these old images is extremely difficult. Also, the [texlive info](https://texlive.info/tlnet-archive/) website does not provide information for TeX Live versions released before 2019, so we are unable to build images for those versions. If you need a specific old version, please open an issue and let us know.
 
+## Available Mirror sites
+
+If you are in China mainland, you can use the following mirror sites to speed up the download of TeXLive Full image.
+```bash
+# Use Aliyun Mirror (2026.1~2020.1)
+registry.cn-hangzhou.aliyuncs.com/ayaka-notes/texlive-full:2026.1
+# Use NJU Mirror (2026.1~2020.1)
+ghcr.nju.edu.cn/ayaka-notes/texlive-full:2026.1
+```
 
 ## Contained Component
 
