@@ -9,8 +9,8 @@ on:
         default: '["2020", "2021", "2022", "2023", "2024", "2025", "2026"]'
 
 env:
-  SOURCE_REGISTRY: ghcr.io
-  SOURCE_IMAGE_NAME: ayaka-notes/texlive-full
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: ayaka-notes/texlive-full
   MIRROR_REGISTRY: registry.cn-hangzhou.aliyuncs.com
   MIRROR_IMAGE_NAME: ayaka-notes/texlive-full
   MIRROR_USERNAME: musicminion
@@ -26,10 +26,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Login to registries
+      - name: Login to GitHub Container Registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | \
-            skopeo login ${{ env.SOURCE_REGISTRY }} --username "${{ github.actor }}" --password-stdin
+            skopeo login ${{ env.DOCKER_REGISTRY }} --username "${{ github.actor }}" --password-stdin
+
+      - name: Login to Aliyun Container Registry
+        run: |
           echo "${{ secrets.ALIYUN_REGISTRY_TOKEN }}" | \
             skopeo login ${{ env.MIRROR_REGISTRY }} --username "${{ env.MIRROR_USERNAME }}" --password-stdin
 
@@ -38,7 +41,7 @@ jobs:
       - name: Copy image to Aliyun mirror
         run: |
           skopeo copy --all --retry-times 3 \
-            docker://${{ env.SOURCE_REGISTRY }}/${{ env.SOURCE_IMAGE_NAME }}:${{ matrix.tex_version }}.1 \
+            docker://${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tex_version }}.1 \
             docker://${{ env.MIRROR_REGISTRY }}/${{ env.MIRROR_IMAGE_NAME }}:${{ matrix.tex_version }}.1
 
       - name: Inspect mirrored image
