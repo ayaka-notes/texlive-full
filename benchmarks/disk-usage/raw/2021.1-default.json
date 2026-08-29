@@ -1,0 +1,14 @@
+{
+  "tag": "2021.1",
+  "mode": "default",
+  "driver": "overlayfs",
+  "rc": 0,
+  "pull_seconds": 235.63,
+  "peak_bytes": 20863787008,
+  "peak_at_s": 235.8,
+  "peak_blob_bytes": 6814478336,
+  "final_bytes": 20863787008,
+  "final_blob_bytes": 6814478336,
+  "image_size": "6814410977",
+  "samples": 1201
+}
