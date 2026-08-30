@@ -1,0 +1,14 @@
+{
+  "tag": "2025.1",
+  "mode": "graphdriver",
+  "driver": "overlay2",
+  "rc": 0,
+  "pull_seconds": 411.68,
+  "peak_bytes": 20670971904,
+  "peak_at_s": 409.0,
+  "peak_blob_bytes": 2119528448,
+  "final_bytes": 18597744640,
+  "final_blob_bytes": 0,
+  "image_size": "17635095257",
+  "samples": 2081
+}

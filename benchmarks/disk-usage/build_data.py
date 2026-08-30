@@ -61,7 +61,8 @@ for tag in TAGS:
 
 data = {
     "default": collect("default"),
-    "graphdriver": collect("graphdriver", "control"),
+    "graphdriver": collect("graphdriver"),
+    "graphdriver_mcd1": collect("graphdriver-mcd1"),
     "manifests": manifests,
     "quota_bytes": int(29.995 * G),
     "measured_on": "2026-08-29",
