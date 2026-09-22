@@ -59,7 +59,7 @@ Thanks to Github Action, we can build all tex image parallel, which includes:
 > For China mainland users, you can replace `ghcr.io` with `ghcr.nju.edu.cn` to speed up the download. But **DO NOT** use `ghcr.nju.edu.cn` directly in your toolkit env  settings. You should keep ghcr.io as your only choice.
 
 | TeXLive Version | Base OS | Architecture | Docker Image | Release Status |
-|:---------------:|:-------:|:------------:|:---------:|:---------------:|
+|:---------------:|:-------:|:------------:|:---------|:---------------:|
 | 2026 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2026.1` | Final |
 | 2025 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2025.1` | Final |
 | 2024 | Ubuntu 24.04 | `amd64` / `arm64` | `ghcr.io/ayaka-notes/texlive-full:2024.1` | Final |
