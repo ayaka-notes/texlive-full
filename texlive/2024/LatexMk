@@ -30,9 +30,104 @@ sub overleaf_pre_process {
     $ORIG_PDF_AGE = -M $output_file
 }
 
+##########
+# Overleaf CE png2pdf protocol ("slow PNG" reporting)
+##########
+# Overleaf SaaS compiles ship a patched latexmk that reports, on stderr,
+# which included PNGs were the "slow" kind (alpha/gamma/palette/
+# interlaced). CLSI parses those lines into the `latexmk-png-slow` stat
+# and uses it to pre-convert slow PNGs to PDF with the png2pdf sibling
+# container (overleaf-cep: LatexMetrics.js, Png2Pdf.js,
+# HistoryResourceWriter.js). Stock latexmk never emits those lines, so
+# replicate the protocol here: classify each PNG input of this compile
+# and report it on stderr:
+#   PNG copy skipped (<alpha|gamma|palette|interlaced|other>): <path>
+#   PNG copy: <path>    (fast plain include)
+
+sub overleaf_png_classify {
+    # Returns alpha|gamma|palette|interlaced|other, or undef for a plain
+    # 8-bit RGB/greyscale non-interlaced PNG without gamma markers (fast).
+    my ($file) = @_;
+    my $fh;
+    open($fh, '<:raw', $file) or return undef;
+    my $hdr;
+    my $got = read($fh, $hdr, 33);
+    if (!defined($got) || $got != 33 || substr($hdr, 0, 8) ne "\x89PNG\r\n\x1a\n") {
+        close($fh);
+        return undef;
+    }
+    # IHDR tail: bitdepth(1) colortype(1) compression(1) filter(1) interlace(1)
+    my $bitdepth  = ord(substr($hdr, 24, 1));
+    my $colortype = ord(substr($hdr, 25, 1));
+    my $interlace = ord(substr($hdr, 28, 1));
+
+    # Bounded chunk walk looking for tRNS / gAMA / iCCP markers
+    my ($trns, $gama, $icc) = (0, 0, 0);
+    my $n = 0;
+    while ($n++ < 10000) {
+        my $len;
+        last unless read($fh, $len, 4) == 4;
+        my $type;
+        last unless read($fh, $type, 4) == 4;
+        last if $type eq "IEND";
+        $trns = 1 if $type eq "tRNS";
+        $gama = 1 if $type eq "gAMA";
+        $icc  = 1 if $type eq "iCCP";
+        seek($fh, unpack("N", $len) + 4, 1);
+    }
+    close($fh);
+
+    return "alpha"      if $colortype == 4 || $colortype == 6;   # grey+alpha / RGBA
+    return "alpha"      if $colortype == 3 && $trns;             # palette + tRNS
+    return "palette"    if $colortype == 3;
+    return "interlaced" if $interlace == 1;
+    return "gamma"      if $gama || $icc;
+    return undef if $bitdepth == 8 && ($colortype == 0 || $colortype == 1 || $colortype == 2);
+    return "other";                                           # e.g. 16-bit depth
+}
+
+sub overleaf_report_slow_pngs {
+    my ($source_file, $output_file) = @_;
+    my $output_base = $output_file =~ s/\.pdf$//r;
+
+    # Collect the PNG inputs of this compile from the dependency DB
+    my %seen;
+    my @pngs;
+    my $fdb = "${output_base}.fdb_latexmk";
+    if (-f $fdb && open(my $fh, '<', $fdb)) {
+        my $content = do { local $/; <$fh> };
+        close($fh);
+        while (defined($content) && $content =~ /"([^"\n]+\.png)"/g) {
+            push @pngs, $1 unless $seen{$1}++;
+        }
+    }
+    # Fallback: scan the compile directory
+    if (!@pngs) {
+        require File::Find;
+        File::Find::find(sub {
+            push @pngs, $File::Find::name
+                if -f $_ && /\A.*\.png\Z/i && !$seen{$_}++;
+        }, '.');
+    }
+
+    for my $p (@pngs) {
+        next unless -e $p;
+        my $cat = overleaf_png_classify($p);
+        if (defined($cat)) {
+            print STDERR "PNG copy skipped ($cat): $p\n";
+        }
+        else {
+            print STDERR "PNG copy: $p\n";
+        }
+    }
+}
+
 sub overleaf_post_process {
     my $source_file = $_[0];
     my $output_file = $_[1];
+    # Report PNG inputs on stderr BEFORE the early returns below (CLSI
+    # parses these lines whenever compile-from-history is active).
+    overleaf_report_slow_pngs($source_file, $output_file);
     my $source_without_ext = $source_file =~ s/\.tex$//r;
     my $output_without_ext = $output_file =~ s/\.pdf$//r;
 
